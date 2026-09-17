@@ -39,6 +39,7 @@ export class SimulationEngine {
 
   public tickCount = 0;
   public currentTickId = 1;
+  public renderMode: 'natural' | 'thermal' = 'natural';
 
   public queuedEvents: ReactionEvent[] = [];
   public newlyDiscoveredCompounds: Set<string> = new Set();
@@ -187,8 +188,13 @@ export class SimulationEngine {
         const dx = px - x;
         const dy = py - y;
         if (dx * dx + dy * dy <= r2) {
-          // Slight randomness for natural brush placement
-          if (radius > 1 && Math.random() < 0.15 && compoundId !== 'empty') {
+          // Slight randomness on outer perimeter for natural brush placement
+          if (
+            (dx !== 0 || dy !== 0) &&
+            radius > 2 &&
+            Math.random() < 0.15 &&
+            compoundId !== 'empty'
+          ) {
             continue;
           }
           const idx = py * this.width + px;
@@ -620,18 +626,58 @@ export class SimulationEngine {
     const temps = this.tempGrid;
     const colors = this.colorLookup;
     const buffer = this.colorBuffer;
+    const isThermal = this.renderMode === 'thermal';
 
     for (let i = 0; i < size; i++) {
       const type = types[i];
+      const temp = temps[i];
+
+      if (isThermal) {
+        // FLIR Thermal Camera false-color mapping (180 K to 800 K)
+        // Normalized 0.0 to 1.0
+        const norm = Math.max(0, Math.min(1, (temp - 180) / (800 - 180)));
+        let r = 0;
+        let g = 0;
+        let b = 0;
+
+        if (norm < 0.25) {
+          // Blue to Cyan
+          const t = norm / 0.25;
+          b = Math.floor(255 * (0.4 + 0.6 * t));
+          g = Math.floor(200 * t);
+          r = Math.floor(30 * (1 - t));
+        } else if (norm < 0.5) {
+          // Cyan to Green
+          const t = (norm - 0.25) / 0.25;
+          g = Math.floor(200 + 55 * t);
+          b = Math.floor(255 * (1 - t));
+        } else if (norm < 0.75) {
+          // Green to Yellow/Orange
+          const t = (norm - 0.5) / 0.25;
+          r = Math.floor(255 * t);
+          g = Math.floor(255 * (1 - 0.2 * t));
+        } else {
+          // Orange to White hot
+          const t = (norm - 0.75) / 0.25;
+          r = 255;
+          g = Math.floor(200 + 55 * t);
+          b = Math.floor(255 * t);
+        }
+
+        const alpha = type === 0 ? 0x44 : 0xff; // Semi-transparent ambient air
+        buffer[i] = (alpha << 24) | (b << 16) | (g << 8) | r;
+        continue;
+      }
+
+      // Natural Chemical Color Mode
       if (type === 0) {
         buffer[i] = 0x00000000;
         continue;
       }
 
       let color = colors[type];
-      const temp = temps[i];
 
-      // Thermal glow effect for high temperatures (> 373 K)
+      // Thermal glow effect for hot particles (> 373 K)
       if (temp > 373.15) {
         const heatShift = Math.min(60, Math.floor((temp - 373.15) / 10));
         const r = Math.min(255, (color & 0xff) + heatShift);

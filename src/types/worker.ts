@@ -16,6 +16,7 @@ export type MainToWorkerMessage =
   | { type: 'PAUSE' }
   | { type: 'CLEAR' }
   | { type: 'PAINT'; payload: PaintCommand }
+  | { type: 'SET_RENDER_MODE'; payload: { mode: 'natural' | 'thermal' } }
   | { type: 'LOAD_STATE'; payload: { types: Uint16Array; temps: Float32Array } }
   | { type: 'REQUEST_STATE' };
 

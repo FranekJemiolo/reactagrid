@@ -22,6 +22,11 @@ interface HUDProps {
   onClear: () => void;
   onOpenStore: () => void;
   onOpenJournal: () => void;
+  onOpenSnapshots: () => void;
+  renderMode: 'natural' | 'thermal';
+  onToggleRenderMode: () => void;
+  isMuted: boolean;
+  onToggleMute: () => void;
   discoveredCount: number;
   totalCompoundsCount: number;
 }
@@ -37,6 +42,11 @@ export const HUD: React.FC<HUDProps> = ({
   onClear,
   onOpenStore,
   onOpenJournal,
+  onOpenSnapshots,
+  renderMode,
+  onToggleRenderMode,
+  isMuted,
+  onToggleMute,
   discoveredCount,
   totalCompoundsCount,
 }) => {
@@ -116,6 +126,42 @@ export const HUD: React.FC<HUDProps> = ({
           <span className="px-1 py-0.2 text-[10px] rounded-full bg-sky-900/80 text-sky-200">
             {discoveredCount}/{totalCompoundsCount}
           </span>
+        </button>
+
+        {/* Experiments & Presets Button */}
+        <button
+          onClick={onOpenSnapshots}
+          id="open-snapshots-button"
+          className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold shadow-lg shadow-amber-600/30 transition-all hover:scale-105 active:scale-95"
+        >
+          <span>Presets</span>
+        </button>
+
+        {/* Thermal Vision Toggle */}
+        <button
+          onClick={onToggleRenderMode}
+          id="toggle-thermal-button"
+          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold border backdrop-blur-md transition-all ${
+            renderMode === 'thermal'
+              ? 'bg-rose-950/80 border-rose-500 text-rose-300 shadow-md shadow-rose-500/30 scale-105'
+              : 'bg-slate-900/80 border-slate-700/60 text-slate-300 hover:text-white'
+          }`}
+          title="Toggle Thermal Vision (FLIR IR)"
+        >
+          <Thermometer className="w-3.5 h-3.5" />
+          <span className="hidden md:inline">
+            {renderMode === 'thermal' ? 'Thermal IR' : 'Natural'}
+          </span>
+        </button>
+
+        {/* Audio Mute/Unmute Toggle */}
+        <button
+          onClick={onToggleMute}
+          id="toggle-audio-button"
+          className="p-1.5 rounded-xl bg-slate-900/80 border border-slate-700/60 text-slate-300 hover:text-white transition-colors"
+          title={isMuted ? 'Unmute Procedural Audio' : 'Mute Audio'}
+        >
+          {isMuted ? '🔇' : '🔊'}
         </button>
 
         {/* Simulation Controls */}

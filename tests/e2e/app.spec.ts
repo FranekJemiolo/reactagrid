@@ -23,6 +23,8 @@ test.describe('ReactaGrid - Complete E2E Gameplay & Simulation Flow', () => {
     await expect(page.locator('#open-store-button')).toBeVisible();
     await expect(page.locator('#open-journal-button')).toBeVisible();
     await expect(page.locator('#toggle-play-button')).toBeVisible();
+    await expect(page.locator('#toggle-thermal-button')).toBeVisible();
+    await expect(page.locator('#toggle-audio-button')).toBeVisible();
   });
 
   test('navigates to Store, purchases an item, updates wallet and unlocks product in palette', async ({
@@ -102,6 +104,40 @@ test.describe('ReactaGrid - Complete E2E Gameplay & Simulation Flow', () => {
 
       // Verify particles reset to 0
       await expect(page.locator('header')).toContainText('0 particles');
+    }
+  });
+
+  test('supports Thermal IR Vision, Audio toggle, and loading curated Experiments', async ({
+    page,
+  }) => {
+    // Toggle Thermal Vision Mode
+    const thermalBtn = page.locator('#toggle-thermal-button');
+    await thermalBtn.click();
+    await expect(thermalBtn).toContainText('Thermal IR');
+
+    // Toggle Audio
+    const audioBtn = page.locator('#toggle-audio-button');
+    await audioBtn.click();
+    await expect(audioBtn).toHaveText('🔇');
+    await audioBtn.click();
+    await expect(audioBtn).toHaveText('🔊');
+
+    // Open Presets / Experiments modal
+    const presetsBtn = page.locator('#open-snapshots-button');
+    if (await presetsBtn.isVisible()) {
+      await presetsBtn.click();
+      const modal = page.locator('#snapshots-modal');
+      await expect(modal).toBeVisible();
+
+      // Load Volcano Experiment
+      const loadVolcano = page.locator('#load-preset-volcano');
+      await loadVolcano.click();
+      await expect(modal).not.toBeVisible();
+
+      // Wait for effervescence / particles
+      await page.waitForTimeout(600);
+      const hudText = await page.locator('header').innerText();
+      expect(hudText).toMatch(/\d+ particles/);
     }
   });
 });

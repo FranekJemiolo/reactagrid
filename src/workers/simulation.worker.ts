@@ -124,6 +124,14 @@ self.addEventListener('message', (e: MessageEvent<MainToWorkerMessage>) => {
       break;
     }
 
+    case 'SET_RENDER_MODE': {
+      if (engine) {
+        engine.renderMode = msg.payload.mode;
+        engine.renderColorBuffer();
+      }
+      break;
+    }
+
     case 'CLEAR': {
       if (engine) {
         engine.clear();

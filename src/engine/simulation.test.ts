@@ -103,10 +103,12 @@ describe('SimulationEngine - Core Physics and Chemistry Passes', () => {
     expect(Array.from(engine.typeGrid).includes(steamId)).toBe(true);
   });
 
-  it('handles chemical reactions: Baking Soda + Vinegar volcano reaction', () => {
-    // Place Baking Soda and Vinegar adjacent to each other
+  it('handles chemical reactions: Baking Soda + Vinegar volcano reaction in a container', () => {
+    // Place Baking Soda and Vinegar in a beaker so liquid does not disperse away
+    engine.setCell(4, 19, 'sio2');
     engine.setCell(5, 19, 'nahco3', 298.15);
     engine.setCell(6, 19, 'ch3cooh', 298.15);
+    engine.setCell(7, 19, 'sio2');
 
     let reacted = false;
     for (let i = 0; i < 15; i++) {

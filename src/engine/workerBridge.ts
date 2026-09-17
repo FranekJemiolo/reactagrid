@@ -96,6 +96,10 @@ export class SimulationWorkerBridge {
     this.send({ type: 'CLEAR' });
   }
 
+  public setRenderMode(mode: 'natural' | 'thermal'): void {
+    this.send({ type: 'SET_RENDER_MODE', payload: { mode } });
+  }
+
   public paint(cmd: PaintCommand): void {
     this.send({ type: 'PAINT', payload: cmd });
   }
