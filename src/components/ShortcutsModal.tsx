@@ -36,6 +36,7 @@ export const ShortcutsModal: React.FC<ShortcutsModalProps> = ({ isOpen, onClose 
       items: [
         { keys: ['T'], description: 'Toggle Thermal IR Vision (FLIR heat map)' },
         { keys: ['G'], description: 'Cycle Gravity (Normal 1G → Zero 0G → Inverted -1G)' },
+        { keys: ['D'], description: 'Toggle Floor Waste Drain (Sealed vs Open)' },
         { keys: ['P'], description: 'Toggle Pixel Inspector Probe Tool' },
         { keys: ['M'], description: 'Toggle procedural audio mute' },
       ],

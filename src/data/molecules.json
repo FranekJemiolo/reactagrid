@@ -527,6 +527,22 @@
     "hazard_description": "Mechanical fluid agitator for mixing.",
     "description": "Solid laboratory agitator that imparts horizontal velocity vectors to adjacent liquids to force mixing."
   },
+  "drain_grate": {
+    "id": "drain_grate",
+    "name": "Drain Grate",
+    "formula": "Waste Drain",
+    "state": "solid",
+    "density": 8.0,
+    "color": "#475569ff",
+    "melting_point_k": 3000.0,
+    "boiling_point_k": 4000.0,
+    "specific_heat": 0.5,
+    "thermal_conductivity": 1.0,
+    "flammable": false,
+    "hazard_rating": 0,
+    "hazard_description": "None (inert disposal fixture).",
+    "description": "Perforated laboratory waste drain grate that absorbs and drains away any dynamic liquids or solids touching it."
+  },
   "h2o_gas": {
     "id": "h2o_gas",
     "name": "Water Vapor (Steam)",

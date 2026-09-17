@@ -339,4 +339,45 @@ test.describe('ReactaGrid - Complete E2E Gameplay & Simulation Flow', () => {
       expect(fpsVal).toBeGreaterThanOrEqual(45);
     }
   });
+
+  test('ensures simulation canvas does not overlap HUD or palette, and tests Floor Drain toggle and keyboard shortcut', async ({
+    page,
+  }) => {
+    const canvas = page.locator('#simulation-canvas');
+    const hud = page.locator('header');
+    const palette = page.locator('footer');
+
+    await expect(canvas).toBeVisible();
+    await expect(hud).toBeVisible();
+    await expect(palette).toBeVisible();
+
+    const canvasBox = await canvas.boundingBox();
+    const hudBox = await hud.boundingBox();
+    const paletteBox = await palette.boundingBox();
+
+    expect(canvasBox).not.toBeNull();
+    expect(hudBox).not.toBeNull();
+    expect(paletteBox).not.toBeNull();
+
+    if (canvasBox && hudBox && paletteBox) {
+      // Assert zero vertical overlap
+      expect(canvasBox.y).toBeGreaterThanOrEqual(hudBox.y + hudBox.height - 1);
+      expect(paletteBox.y).toBeGreaterThanOrEqual(canvasBox.y + canvasBox.height - 1);
+    }
+
+    // Verify Floor Drain button is visible
+    const drainBtn = page.locator('#toggle-floor-drain-button');
+    await expect(drainBtn).toBeVisible();
+    await expect(drainBtn).toContainText('Drain: Sealed');
+
+    // Click to toggle Floor Drain
+    await drainBtn.click();
+    await expect(drainBtn).toContainText('Drain: Open');
+    await expect(page.locator('#active-floor-drain-grate')).toBeVisible();
+
+    // Toggle back with keyboard shortcut 'd'
+    await page.keyboard.press('d');
+    await expect(drainBtn).toContainText('Drain: Sealed');
+    await expect(page.locator('#active-floor-drain-grate')).not.toBeVisible();
+  });
 });

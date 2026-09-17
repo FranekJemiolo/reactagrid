@@ -33,7 +33,7 @@ export const BrushPalette: React.FC<BrushPaletteProps> = ({
   ];
 
   return (
-    <footer className="absolute bottom-3 left-1/2 -translate-x-1/2 max-w-4xl w-[96%] p-2 rounded-2xl bg-slate-900/85 backdrop-blur-xl border border-slate-700/70 shadow-2xl z-20 flex flex-col gap-2">
+    <footer className="max-w-4xl w-full p-2 rounded-2xl bg-slate-900/85 backdrop-blur-xl border border-slate-700/70 shadow-2xl z-20 flex flex-col gap-2">
       {/* Top Toolbar: Brush Radius & Temperature Presets */}
       <div className="flex items-center justify-between gap-2 border-b border-slate-800/80 pb-1.5 px-1 text-xs">
         {/* Brush Size Selector */}

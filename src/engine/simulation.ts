@@ -52,6 +52,8 @@ export class SimulationEngine {
   public shatteredGlassCount = 0;
   public stirrerRotationalVelocity = 0;
   public stirrerSustainedSeconds = 0;
+  public floorDrain = false;
+  public drainedParticleCount = 0;
 
   constructor(width: number, height: number, database: ChemicalDatabase) {
     this.width = width;
@@ -129,7 +131,8 @@ export class SimulationEngine {
         mol.id === 'glass' ||
         mol.id === 'bunsen_burner' ||
         mol.id === 'cooling_plate' ||
-        mol.id === 'stirrer';
+        mol.id === 'stirrer' ||
+        mol.id === 'drain_grate';
       this.isStaticLookup[index] = isStatic ? 1 : 0;
 
       index++;
@@ -184,6 +187,24 @@ export class SimulationEngine {
     this.shatteredGlassCount = 0;
     this.stirrerRotationalVelocity = 0;
     this.stirrerSustainedSeconds = 0;
+  }
+
+  public flushFloor(rows = 8): void {
+    const w = this.width;
+    const h = this.height;
+    const startY = Math.max(0, h - rows);
+    for (let y = startY; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const idx = y * w + x;
+        const type = this.typeGrid[idx];
+        if (type !== 0 && this.isStaticLookup[type] === 0) {
+          this.typeGrid[idx] = 0;
+          this.tempGrid[idx] = 298.15;
+          this.drainedParticleCount++;
+        }
+      }
+    }
+    this.renderColorBuffer();
   }
 
   public setCell(x: number, y: number, compoundId: string, tempK = 298.15): void {
@@ -336,6 +357,7 @@ export class SimulationEngine {
     const stirrerId = this.getSpeciesId('stirrer');
     const glassId = this.getSpeciesId('glass');
     const sio2Id = this.getSpeciesId('sio2');
+    const drainGrateId = this.getSpeciesId('drain_grate');
 
     for (let y = 0; y < h; y++) {
       for (let x = 0; x < w; x++) {
@@ -427,6 +449,25 @@ export class SimulationEngine {
             this.shatteredGlassCount++;
           }
         }
+        // 5. Drain Grate: Absorbs and drains dynamic liquid or solid particles touching it
+        else if (type === drainGrateId) {
+          const neighbors = [
+            x + 1 < w ? y * w + (x + 1) : -1,
+            x - 1 >= 0 ? y * w + (x - 1) : -1,
+            y + 1 < h ? (y + 1) * w + x : -1,
+            y - 1 >= 0 ? (y - 1) * w + x : -1,
+          ];
+          for (const nIdx of neighbors) {
+            if (nIdx !== -1) {
+              const nType = types[nIdx];
+              if (nType !== 0 && this.isStaticLookup[nType] === 0) {
+                types[nIdx] = 0;
+                temps[nIdx] = 298.15;
+                this.drainedParticleCount++;
+              }
+            }
+          }
+        }
       }
     }
 
@@ -443,6 +484,7 @@ export class SimulationEngine {
     const w = this.width;
     const h = this.height;
     const types = this.typeGrid;
+    const temps = this.tempGrid;
     const flags = this.flagGrid;
     const tick = this.currentTickId;
     const densities = this.densityLookup;
@@ -505,6 +547,17 @@ export class SimulationEngine {
             continue;
           }
 
+          // Active floor drain pass: drains particles touching or falling out of tank boundary
+          if (
+            this.floorDrain &&
+            (fallY >= h || fallY < 0 || (grav === 1 && y === h - 1) || (grav === -1 && y === 0))
+          ) {
+            types[idx] = 0;
+            temps[idx] = 298.15;
+            this.drainedParticleCount++;
+            continue;
+          }
+
           // Dynamic SOLID (Sand, Iron, Baking Soda, etc.)
           if (fallY >= 0 && fallY < h) {
             const belowIdx = fallY * w + x;
@@ -543,6 +596,17 @@ export class SimulationEngine {
             }
           }
         } else if (state === 1) {
+          // Active floor drain pass: drains liquids touching or falling out of tank boundary
+          if (
+            this.floorDrain &&
+            (fallY >= h || fallY < 0 || (grav === 1 && y === h - 1) || (grav === -1 && y === 0))
+          ) {
+            types[idx] = 0;
+            temps[idx] = 298.15;
+            this.drainedParticleCount++;
+            continue;
+          }
+
           // LIQUID (Water, Vinegar, Bleach, Ammonia, Acid, Alcohol)
           if (fallY >= 0 && fallY < h) {
             const belowIdx = fallY * w + x;
@@ -971,6 +1035,7 @@ export class SimulationEngine {
     avgTemperature: number;
     maxTemperature: number;
     minTemperature: number;
+    drainedCount: number;
   } {
     let active = 0;
     let totalTemp = 0;
@@ -1000,6 +1065,7 @@ export class SimulationEngine {
       avgTemperature: active > 0 ? totalTemp / active : 298.15,
       maxTemperature: maxTemp,
       minTemperature: minTemp,
+      drainedCount: this.drainedParticleCount,
     };
   }
 }

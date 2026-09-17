@@ -23,7 +23,9 @@ export type MainToWorkerMessage =
   | { type: 'QUERY_CELL'; payload: { x: number; y: number } }
   | { type: 'LOAD_STATE'; payload: { types: Uint16Array; temps: Float32Array } }
   | { type: 'REQUEST_STATE' }
-  | { type: 'SET_CAMPAIGN_LEVEL'; payload: { level: CampaignLevel | null } };
+  | { type: 'SET_CAMPAIGN_LEVEL'; payload: { level: CampaignLevel | null } }
+  | { type: 'SET_FLOOR_DRAIN'; payload: { enabled: boolean } }
+  | { type: 'FLUSH_FLOOR'; payload?: { rows?: number } };
 
 export type WorkerToMainMessage =
   | { type: 'INITIALIZED'; payload: { width: number; height: number } }
@@ -38,6 +40,7 @@ export type WorkerToMainMessage =
         avgTemperature: number;
         maxTemperature?: number;
         minTemperature?: number;
+        drainedCount?: number;
       };
     }
   | {

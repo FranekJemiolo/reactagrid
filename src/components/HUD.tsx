@@ -14,6 +14,7 @@ import {
   FastForward,
   GraduationCap,
   Trophy,
+  Waves,
 } from 'lucide-react';
 
 interface HUDProps {
@@ -25,6 +26,9 @@ interface HUDProps {
   onTogglePlay: () => void;
   onStep: () => void;
   onClear: () => void;
+  floorDrain?: boolean;
+  onToggleFloorDrain?: () => void;
+  onFlushFloor?: () => void;
   onOpenStore: () => void;
   onOpenJournal: () => void;
   onOpenSnapshots: () => void;
@@ -67,6 +71,9 @@ export const HUD: React.FC<HUDProps> = ({
   onTogglePlay,
   onStep,
   onClear,
+  floorDrain,
+  onToggleFloorDrain,
+  onFlushFloor,
   onOpenStore,
   onOpenJournal,
   onOpenSnapshots,
@@ -100,7 +107,7 @@ export const HUD: React.FC<HUDProps> = ({
   };
 
   return (
-    <header className="absolute top-0 left-0 right-0 p-3 pointer-events-none flex flex-wrap items-center justify-between gap-2 z-20">
+    <header className="w-full p-2 sm:p-3 pointer-events-none flex flex-wrap items-center justify-between gap-2 z-20">
       {/* Brand & Stats Overlay */}
       <div className="flex items-center gap-2 pointer-events-auto">
         <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900/80 backdrop-blur-md border border-slate-700/60 shadow-lg text-white font-semibold">
@@ -237,6 +244,29 @@ export const HUD: React.FC<HUDProps> = ({
           <span>{speedMultiplier}x</span>
         </button>
 
+        {/* Floor Waste Drain Toggle */}
+        {onToggleFloorDrain && (
+          <button
+            onClick={onToggleFloorDrain}
+            id="toggle-floor-drain-button"
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold border backdrop-blur-md transition-all ${
+              floorDrain
+                ? 'bg-cyan-950/90 border-cyan-400 text-cyan-300 shadow-md shadow-cyan-500/30 scale-105'
+                : 'bg-slate-900/80 border-slate-700/60 text-slate-400 hover:text-white'
+            }`}
+            title={
+              floorDrain
+                ? 'Tank Floor Drain: OPEN [D] — Draining bottom sediment & recycling into funds'
+                : 'Tank Floor Drain: SEALED [D] — Click to open floor waste drain'
+            }
+          >
+            <span>{floorDrain ? '🚰' : '🛡️'}</span>
+            <span className="hidden sm:inline font-mono">
+              {floorDrain ? 'Drain: Open' : 'Drain: Sealed'}
+            </span>
+          </button>
+        )}
+
         {/* Pixel Probe Inspector Toggle */}
         <button
           onClick={onToggleProbe}
@@ -347,6 +377,17 @@ export const HUD: React.FC<HUDProps> = ({
           >
             <StepForward className="w-4 h-4" />
           </button>
+
+          {onFlushFloor && (
+            <button
+              onClick={onFlushFloor}
+              id="flush-floor-button"
+              className="p-1.5 rounded-lg hover:bg-cyan-950/60 text-slate-300 hover:text-cyan-400 transition-colors"
+              title="Flush Tank Floor: Clears dynamic sediment on bottom without clearing glassware or heaters"
+            >
+              <Waves className="w-4 h-4" />
+            </button>
+          )}
 
           <button
             onClick={onClear}

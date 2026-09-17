@@ -276,6 +276,22 @@
     "icon": "Activity"
   },
   {
+    "id": "item_drain_grate",
+    "name": "Waste Drain Grate",
+    "category": "Equipment",
+    "cost": 10,
+    "description": "Perforated laboratory floor fixture that drains away any dynamic liquids or solids touching it.",
+    "unlocked_by_default": true,
+    "composition": [
+      {
+        "compound": "drain_grate",
+        "percentage": 100
+      }
+    ],
+    "primary_compound": "drain_grate",
+    "icon": "Filter"
+  },
+  {
     "id": "item_ice_block",
     "name": "Solid Ice Block",
     "category": "Basics",

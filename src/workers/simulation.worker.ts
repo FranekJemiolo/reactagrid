@@ -93,6 +93,7 @@ function tick() {
       avgTemperature: stats.avgTemperature,
       maxTemperature: stats.maxTemperature,
       minTemperature: stats.minTemperature,
+      drainedCount: stats.drainedCount,
     },
   };
 
@@ -216,6 +217,21 @@ self.addEventListener('message', (e: MessageEvent<MainToWorkerMessage>) => {
       hasWonCampaignLevel = false;
       if (engine && activeCampaignLevel?.initialGrid) {
         engine.loadInitialGrid(activeCampaignLevel.initialGrid);
+      }
+      break;
+    }
+
+    case 'SET_FLOOR_DRAIN': {
+      if (engine) {
+        engine.floorDrain = msg.payload.enabled;
+      }
+      break;
+    }
+
+    case 'FLUSH_FLOOR': {
+      if (engine) {
+        engine.flushFloor(msg.payload?.rows);
+        tick();
       }
       break;
     }

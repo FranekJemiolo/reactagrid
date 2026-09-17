@@ -9,6 +9,7 @@ interface CanvasRendererProps {
   onLeave?: () => void;
   pixelsRef: React.MutableRefObject<Uint32Array | null>;
   brushRadius: number;
+  floorDrain?: boolean;
   vfxRef?: React.MutableRefObject<VFXRenderer | null>;
 }
 
@@ -55,6 +56,7 @@ export const CanvasRenderer: React.FC<CanvasRendererProps> = ({
   onLeave,
   pixelsRef,
   brushRadius,
+  floorDrain,
   vfxRef,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -275,7 +277,7 @@ export const CanvasRenderer: React.FC<CanvasRendererProps> = ({
   };
 
   return (
-    <div className="relative w-full h-full flex items-center justify-center overflow-hidden select-none touch-none bg-slate-950 p-2 sm:p-4">
+    <div className="relative w-full h-full flex items-center justify-center overflow-hidden select-none touch-none bg-transparent">
       {/* Aspect-Ratio Preserving Stage Wrapper */}
       <div
         className="relative flex items-center justify-center shadow-2xl rounded-lg border border-slate-800 bg-black overflow-hidden"
@@ -310,6 +312,19 @@ export const CanvasRenderer: React.FC<CanvasRendererProps> = ({
           height={height}
           className="pointer-events-none absolute inset-0 w-full h-full rounded-lg"
         />
+
+        {/* Active Floor Drain Grate Graphic */}
+        {floorDrain && (
+          <div
+            id="active-floor-drain-grate"
+            className="pointer-events-none absolute bottom-0 left-0 right-0 h-3 bg-gradient-to-t from-cyan-500/30 to-transparent border-b-2 border-cyan-400/80 border-dashed flex items-center justify-center animate-pulse"
+            title="Active Waste Drain Grate"
+          >
+            <span className="text-[8px] font-mono tracking-widest text-cyan-300 font-bold uppercase opacity-80 select-none">
+              ▼ WASTE DRAIN OPEN ▼
+            </span>
+          </div>
+        )}
 
         {/* Exact Brush Indicator located INSIDE the stage wrapper */}
         {cursorPos && (

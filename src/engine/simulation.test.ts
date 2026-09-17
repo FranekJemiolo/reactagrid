@@ -434,4 +434,62 @@ describe('SimulationEngine - Core Physics and Chemistry Passes', () => {
     expect(stats.minTemperature).toBe(250.0);
     expect(stats.maxTemperature).toBe(600.0);
   });
+
+  it('drains falling dynamic particles at the bottom floor when floorDrain is active', () => {
+    engine.clear();
+    engine.floorDrain = true;
+
+    // Place sand at bottom row y=19
+    engine.setCell(10, 19, 'sio2');
+    expect(engine.getStats().activeParticles).toBe(1);
+
+    // Step simulation: sand at the floor boundary should drain out
+    engine.step();
+    expect(engine.getStats().activeParticles).toBe(0);
+    expect(engine.drainedParticleCount).toBeGreaterThanOrEqual(1);
+
+    // Drop water from above: should fall and drain upon hitting floor
+    engine.setCell(10, 18, 'h2o');
+    engine.step();
+    engine.step();
+    expect(engine.getStats().activeParticles).toBe(0);
+  });
+
+  it('absorbs dynamic liquids touching a placeable drain_grate fixture', () => {
+    engine.clear();
+    engine.floorDrain = false;
+
+    // Place a drain_grate fixture at (10, 10)
+    engine.setCell(10, 10, 'drain_grate');
+    // Place water adjacent at (10, 9)
+    engine.setCell(10, 9, 'h2o');
+
+    const drainGrateId = engine.getSpeciesId('drain_grate');
+    expect(engine.typeGrid[10 * 20 + 10]).toBe(drainGrateId);
+    expect(engine.getStats().activeParticles).toBe(2);
+
+    // Step simulation: drain grate pass absorbs adjacent water
+    engine.step();
+    // Grate remains, water was drained
+    expect(engine.typeGrid[10 * 20 + 10]).toBe(drainGrateId);
+    expect(engine.getStats().activeParticles).toBe(1);
+    expect(engine.drainedParticleCount).toBeGreaterThanOrEqual(1);
+  });
+
+  it('flushes only bottom dynamic sediment when flushFloor is called', () => {
+    engine.clear();
+    // Place static glass and dynamic sand on floor
+    engine.setCell(5, 19, 'glass');
+    engine.setCell(6, 19, 'sio2');
+    engine.setCell(7, 18, 'h2o');
+
+    const glassId = engine.getSpeciesId('glass');
+    expect(engine.getStats().activeParticles).toBe(3);
+
+    engine.flushFloor(4);
+
+    // Glassware must remain anchored, while sand & water are purged
+    expect(engine.typeGrid[19 * 20 + 5]).toBe(glassId);
+    expect(engine.getStats().activeParticles).toBe(1);
+  });
 });

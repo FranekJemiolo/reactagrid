@@ -11,6 +11,7 @@ export interface WorkerBridgeCallbacks {
     avgTemperature: number;
     maxTemperature?: number;
     minTemperature?: number;
+    drainedCount?: number;
   }) => void;
   onReaction?: (reaction: {
     reactionId: string;
@@ -152,6 +153,14 @@ export class SimulationWorkerBridge {
 
   public setCampaignLevel(level: CampaignLevel | null): void {
     this.send({ type: 'SET_CAMPAIGN_LEVEL', payload: { level } });
+  }
+
+  public setFloorDrain(enabled: boolean): void {
+    this.send({ type: 'SET_FLOOR_DRAIN', payload: { enabled } });
+  }
+
+  public flushFloor(rows?: number): void {
+    this.send({ type: 'FLUSH_FLOOR', payload: { rows } });
   }
 
   public terminate(): void {

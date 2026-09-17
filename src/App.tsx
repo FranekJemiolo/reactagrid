@@ -56,6 +56,8 @@ export const App: React.FC = () => {
   const [isProbeActive, setIsProbeActive] = useState<boolean>(false);
   const [probeData, setProbeData] = useState<CellProbeData | null>(null);
   const [isMuted, setIsMuted] = useState<boolean>(false);
+  const [floorDrain, setFloorDrain] = useState<boolean>(false);
+  const lastDrainedCountRef = useRef<number>(0);
 
   // Brush & Toolbar State
   const [selectedItemId, setSelectedItemId] = useState<string>('item_tap_water');
@@ -120,6 +122,35 @@ export const App: React.FC = () => {
           : next === 0
             ? 'Microgravity 0G (Orbital Space)'
             : 'Inverted -1G Gravity (Ceiling Pull)',
+    });
+  };
+
+  const handleToggleFloorDrain = () => {
+    setFloorDrain((prev) => {
+      const next = !prev;
+      bridgeRef.current?.setFloorDrain(next);
+      if (next) {
+        sounds.playBubbling();
+        addToast({
+          title: 'Floor Waste Drain Open 🚰',
+          message: 'Bottom dynamic sediment & liquids will drain away and recycle into funds.',
+        });
+      } else {
+        addToast({
+          title: 'Tank Floor Sealed 🛡️',
+          message: 'Floor drain closed. Liquids will pool and solids will stack.',
+        });
+      }
+      return next;
+    });
+  };
+
+  const handleFlushFloor = () => {
+    bridgeRef.current?.flushFloor(10);
+    sounds.playBubbling();
+    addToast({
+      title: 'Tank Floor Flushed 🌊',
+      message: 'Purged dynamic bottom sediment without touching glassware or equipment.',
     });
   };
 
@@ -315,6 +346,20 @@ export const App: React.FC = () => {
           setAvgTemp(data.avgTemperature);
           if (data.maxTemperature !== undefined) setMaxTemp(data.maxTemperature);
           if (data.minTemperature !== undefined) setMinTemp(data.minTemperature);
+
+          if (data.drainedCount !== undefined && data.drainedCount > lastDrainedCountRef.current) {
+            const delta = data.drainedCount - lastDrainedCountRef.current;
+            lastDrainedCountRef.current = data.drainedCount;
+            const earned = Math.floor(delta / 25);
+            if (earned > 0) {
+              setProgress((prev) => {
+                if (!prev) return prev;
+                const nextProg = { ...prev, funds: prev.funds + earned };
+                saveProgress(nextProg);
+                return nextProg;
+              });
+            }
+          }
         },
         onLevelWon: (payload) => {
           const current = progressRef.current;
@@ -659,6 +704,16 @@ export const App: React.FC = () => {
         return;
       }
 
+      if (e.key === 'd' || e.key === 'D') {
+        e.preventDefault();
+        setFloorDrain((prev) => {
+          const next = !prev;
+          bridgeRef.current?.setFloorDrain(next);
+          return next;
+        });
+        return;
+      }
+
       if (e.key === 'p' || e.key === 'P') {
         e.preventDefault();
         setIsProbeActive((prev) => {
@@ -707,86 +762,96 @@ export const App: React.FC = () => {
   }, []);
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden bg-slate-950 font-sans select-none">
-      {/* Heads-Up Display */}
-      <HUD
-        fps={fps}
-        activeParticles={activeParticles}
-        avgTemperature={avgTemp}
-        maxTemperature={maxTemp}
-        minTemperature={minTemp}
-        hoveredCell={hoveredCell}
-        funds={progress?.funds ?? 0}
-        isRunning={isRunning}
-        onTogglePlay={handleTogglePlay}
-        onStep={handleStep}
-        onClear={handleClear}
-        onOpenStore={() => setIsStoreOpen(true)}
-        onOpenJournal={() => setIsJournalOpen(true)}
-        onOpenSnapshots={() => setIsSnapshotsOpen(true)}
-        onOpenTutorial={() => setIsTutorialOpen(true)}
-        onOpenCampaign={() => setIsCampaignOpen(true)}
-        renderMode={renderMode}
-        onToggleRenderMode={handleToggleRenderMode}
-        gravity={gravity}
-        onToggleGravity={handleToggleGravity}
-        isProbeActive={isProbeActive}
-        onToggleProbe={handleToggleProbe}
-        isMuted={isMuted}
-        onToggleMute={handleToggleMute}
-        speedMultiplier={speedMultiplier}
-        onCycleSpeed={handleCycleSpeed}
-        onExportSnapshot={handleExportSnapshot}
-        onOpenShortcuts={() => setIsShortcutsOpen(true)}
-        discoveredCount={progress?.discoveredCompounds.length ?? 0}
-        totalCompoundsCount={Object.keys(chemicalDatabase.molecules).length - 1}
-      />
+    <div className="relative w-screen h-screen overflow-hidden bg-slate-950 font-sans select-none flex flex-col justify-between">
+      {/* Top Header Region: Heads-Up Display & Mission Banner */}
+      <div className="relative z-20 flex-shrink-0 w-full flex flex-col items-center">
+        <HUD
+          fps={fps}
+          activeParticles={activeParticles}
+          avgTemperature={avgTemp}
+          maxTemperature={maxTemp}
+          minTemperature={minTemp}
+          hoveredCell={hoveredCell}
+          funds={progress?.funds ?? 0}
+          isRunning={isRunning}
+          onTogglePlay={handleTogglePlay}
+          onStep={handleStep}
+          onClear={handleClear}
+          floorDrain={floorDrain}
+          onToggleFloorDrain={handleToggleFloorDrain}
+          onFlushFloor={handleFlushFloor}
+          onOpenStore={() => setIsStoreOpen(true)}
+          onOpenJournal={() => setIsJournalOpen(true)}
+          onOpenSnapshots={() => setIsSnapshotsOpen(true)}
+          onOpenTutorial={() => setIsTutorialOpen(true)}
+          onOpenCampaign={() => setIsCampaignOpen(true)}
+          renderMode={renderMode}
+          onToggleRenderMode={handleToggleRenderMode}
+          gravity={gravity}
+          onToggleGravity={handleToggleGravity}
+          isProbeActive={isProbeActive}
+          onToggleProbe={handleToggleProbe}
+          isMuted={isMuted}
+          onToggleMute={handleToggleMute}
+          speedMultiplier={speedMultiplier}
+          onCycleSpeed={handleCycleSpeed}
+          onExportSnapshot={handleExportSnapshot}
+          onOpenShortcuts={() => setIsShortcutsOpen(true)}
+          discoveredCount={progress?.discoveredCompounds.length ?? 0}
+          totalCompoundsCount={Object.keys(chemicalDatabase.molecules).length - 1}
+        />
 
-      {/* Active Campaign Mission Banner */}
-      {activeLevel && (
-        <div
-          className="absolute top-16 left-1/2 -translate-x-1/2 z-20 px-4 py-2 rounded-2xl bg-slate-900/90 border border-sky-500/50 backdrop-blur-md shadow-xl flex items-center gap-3 text-xs text-white"
-          id="campaign-active-banner"
-        >
-          <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
-          <span className="font-bold text-sky-400">Mission: {activeLevel.title}</span>
-          <span className="text-slate-300">Goal: {activeLevel.winCondition.description}</span>
-          <button
-            onClick={handleExitCampaign}
-            id="exit-campaign-button"
-            className="ml-2 px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors"
+        {/* Active Campaign Mission Banner */}
+        {activeLevel && (
+          <div
+            className="mt-0.5 px-4 py-1.5 rounded-2xl bg-slate-900/95 border border-sky-500/50 backdrop-blur-md shadow-xl flex items-center gap-3 text-xs text-white"
+            id="campaign-active-banner"
           >
-            Exit Mission
-          </button>
-        </div>
-      )}
+            <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+            <span className="font-bold text-sky-400">Mission: {activeLevel.title}</span>
+            <span className="text-slate-300">Goal: {activeLevel.winCondition.description}</span>
+            <button
+              onClick={handleExitCampaign}
+              id="exit-campaign-button"
+              className="ml-2 px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors"
+            >
+              Exit Mission
+            </button>
+          </div>
+        )}
+      </div>
 
-      {/* Main Simulation Tank Canvas */}
-      <CanvasRenderer
-        width={GRID_WIDTH}
-        height={GRID_HEIGHT}
-        onPaint={handlePaint}
-        onHover={handleCanvasHover}
-        onLeave={handleCanvasLeave}
-        pixelsRef={pixelsRef}
-        brushRadius={brushRadius}
-        vfxRef={vfxRef}
-      />
+      {/* Main Simulation Tank Canvas - Guaranteed Zero Overlap */}
+      <main className="relative z-10 flex-1 w-full min-h-0 min-w-0 flex items-center justify-center px-2 py-1 sm:px-4">
+        <CanvasRenderer
+          width={GRID_WIDTH}
+          height={GRID_HEIGHT}
+          onPaint={handlePaint}
+          onHover={handleCanvasHover}
+          onLeave={handleCanvasLeave}
+          pixelsRef={pixelsRef}
+          brushRadius={brushRadius}
+          floorDrain={floorDrain}
+          vfxRef={vfxRef}
+        />
+      </main>
+
+      {/* Brush & Chemical Selection Palette - Responsive Bottom Flow */}
+      <div className="relative z-20 flex-shrink-0 w-full flex justify-center pb-2.5 px-3">
+        <BrushPalette
+          unlockedItems={unlockedItems}
+          molecules={chemicalDatabase.molecules}
+          selectedItemId={selectedItemId}
+          onSelectItem={setSelectedItemId}
+          brushRadius={brushRadius}
+          onSelectRadius={setBrushRadius}
+          brushTempK={brushTempK}
+          onSelectTemp={setBrushTempK}
+        />
+      </div>
 
       {/* Real-time Pixel Probe Tooltip */}
       <CellProbe data={probeData} molecules={chemicalDatabase.molecules} />
-
-      {/* Brush & Chemical Selection Palette */}
-      <BrushPalette
-        unlockedItems={unlockedItems}
-        molecules={chemicalDatabase.molecules}
-        selectedItemId={selectedItemId}
-        onSelectItem={setSelectedItemId}
-        brushRadius={brushRadius}
-        onSelectRadius={setBrushRadius}
-        brushTempK={brushTempK}
-        onSelectTemp={setBrushTempK}
-      />
 
       {/* Store Drawer Modal */}
       <StoreModal
