@@ -11,6 +11,41 @@ interface CanvasRendererProps {
   vfxRef?: React.MutableRefObject<VFXRenderer | null>;
 }
 
+// Bresenham's line interpolation to guarantee continuous drawing without gaps
+function interpolatePoints(
+  x0: number,
+  y0: number,
+  x1: number,
+  y1: number,
+): { x: number; y: number }[] {
+  const points: { x: number; y: number }[] = [];
+  const dx = Math.abs(x1 - x0);
+  const dy = Math.abs(y1 - y0);
+  const sx = x0 < x1 ? 1 : -1;
+  const sy = y0 < y1 ? 1 : -1;
+  let err = dx - dy;
+
+  let currX = x0;
+  let currY = y0;
+
+  let maxSteps = (dx + dy) * 2 + 10;
+  while (maxSteps > 0) {
+    maxSteps--;
+    points.push({ x: currX, y: currY });
+    if (currX === x1 && currY === y1) break;
+    const e2 = 2 * err;
+    if (e2 > -dy) {
+      err -= dy;
+      currX += sx;
+    }
+    if (e2 < dx) {
+      err += dx;
+      currY += sy;
+    }
+  }
+  return points;
+}
+
 export const CanvasRenderer: React.FC<CanvasRendererProps> = ({
   width,
   height,
@@ -24,6 +59,7 @@ export const CanvasRenderer: React.FC<CanvasRendererProps> = ({
   const overlayCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [cursorPos, setCursorPos] = useState<{ x: number; y: number } | null>(null);
+  const lastPosRef = useRef<{ x: number; y: number } | null>(null);
   const animFrameRef = useRef<number | null>(null);
   const internalVfxRef = useRef<VFXRenderer | null>(null);
 
@@ -101,6 +137,22 @@ export const CanvasRenderer: React.FC<CanvasRendererProps> = ({
     };
   }, [width, height, pixelsRef]);
 
+  // Window-level mouseup/touchend to prevent stuck drawing state when mouse leaves canvas
+  useEffect(() => {
+    const handleGlobalUp = () => {
+      setIsDrawing(false);
+      lastPosRef.current = null;
+    };
+
+    window.addEventListener('mouseup', handleGlobalUp);
+    window.addEventListener('touchend', handleGlobalUp);
+
+    return () => {
+      window.removeEventListener('mouseup', handleGlobalUp);
+      window.removeEventListener('touchend', handleGlobalUp);
+    };
+  }, []);
+
   const getGridCoords = useCallback(
     (e: React.MouseEvent | React.TouchEvent): { x: number; y: number } | null => {
       const canvas = canvasRef.current;
@@ -119,28 +171,57 @@ export const CanvasRenderer: React.FC<CanvasRendererProps> = ({
         clientY = e.clientY;
       }
 
-      const scaleX = width / rect.width;
-      const scaleY = height / rect.height;
+      // Exact aspect-ratio aware letterbox / pillarbox offset calculation
+      const canvasRatio = width / height;
+      const elemRatio = rect.width / rect.height;
 
-      const x = Math.floor((clientX - rect.left) * scaleX);
-      const y = Math.floor((clientY - rect.top) * scaleY);
+      let renderWidth = rect.width;
+      let renderHeight = rect.height;
+      let offsetX = 0;
+      let offsetY = 0;
 
-      if (x < 0 || x >= width || y < 0 || y >= height) return null;
+      if (elemRatio > canvasRatio + 0.001) {
+        // Pillarboxed: horizontal letterboxing (empty bars on left and right)
+        renderWidth = rect.height * canvasRatio;
+        offsetX = (rect.width - renderWidth) / 2;
+      } else if (elemRatio < canvasRatio - 0.001) {
+        // Letterboxed: vertical letterboxing (empty bars on top and bottom)
+        renderHeight = rect.width / canvasRatio;
+        offsetY = (rect.height - renderHeight) / 2;
+      }
+
+      const relativeX = clientX - rect.left - offsetX;
+      const relativeY = clientY - rect.top - offsetY;
+
+      if (relativeX < 0 || relativeX >= renderWidth || relativeY < 0 || relativeY >= renderHeight) {
+        return null;
+      }
+
+      const x = Math.min(width - 1, Math.max(0, Math.floor((relativeX / renderWidth) * width)));
+      const y = Math.min(height - 1, Math.max(0, Math.floor((relativeY / renderHeight) * height)));
+
       return { x, y };
     },
     [width, height],
   );
 
   const handlePointerDown = (e: React.MouseEvent | React.TouchEvent) => {
+    if ('touches' in e) {
+      e.preventDefault();
+    }
     setIsDrawing(true);
     const coords = getGridCoords(e);
     if (coords) {
+      lastPosRef.current = coords;
       setCursorPos(coords);
       onPaint(coords.x, coords.y);
     }
   };
 
   const handlePointerMove = (e: React.MouseEvent | React.TouchEvent) => {
+    if ('touches' in e && isDrawing) {
+      e.preventDefault();
+    }
     const coords = getGridCoords(e);
     if (coords) {
       setCursorPos(coords);
@@ -158,61 +239,88 @@ export const CanvasRenderer: React.FC<CanvasRendererProps> = ({
       onHover?.(coords.x, coords.y, clientX, clientY);
 
       if (isDrawing) {
-        onPaint(coords.x, coords.y);
+        if (lastPosRef.current) {
+          const pts = interpolatePoints(
+            lastPosRef.current.x,
+            lastPosRef.current.y,
+            coords.x,
+            coords.y,
+          );
+          for (let i = 1; i < pts.length; i++) {
+            onPaint(pts[i].x, pts[i].y);
+          }
+        } else {
+          onPaint(coords.x, coords.y);
+        }
+        lastPosRef.current = coords;
       }
+    } else if (!isDrawing) {
+      setCursorPos(null);
     }
   };
 
   const handlePointerUp = () => {
     setIsDrawing(false);
+    lastPosRef.current = null;
   };
 
   const handlePointerLeave = () => {
-    setIsDrawing(false);
-    setCursorPos(null);
+    if (!isDrawing) {
+      setCursorPos(null);
+    }
   };
 
   return (
-    <div className="relative w-full h-full flex items-center justify-center overflow-hidden select-none touch-none bg-slate-950">
-      {/* Main Simulation Tank Canvas (WebGL Bloom / 2D fallback) */}
-      <canvas
-        ref={canvasRef}
-        id="simulation-canvas"
-        width={width}
-        height={height}
-        className="w-full h-full max-w-full max-h-full object-contain cursor-crosshair rounded-lg shadow-2xl border border-slate-800"
-        style={{ imageRendering: 'pixelated' }}
-        onMouseDown={handlePointerDown}
-        onMouseMove={handlePointerMove}
-        onMouseUp={handlePointerUp}
-        onMouseLeave={handlePointerLeave}
-        onTouchStart={handlePointerDown}
-        onTouchMove={handlePointerMove}
-        onTouchEnd={handlePointerUp}
-      />
-
-      {/* Overlaid Particle System Canvas (Sparks, Smoke, Shockwaves) */}
-      <canvas
-        ref={overlayCanvasRef}
-        id="vfx-particle-overlay"
-        width={width}
-        height={height}
-        className="pointer-events-none absolute w-full h-full max-w-full max-h-full object-contain rounded-lg"
-      />
-
-      {/* Brush Indicator */}
-      {cursorPos && (
-        <div
-          className="pointer-events-none absolute border border-sky-400/60 rounded-full bg-sky-400/10 transition-transform duration-75"
-          style={{
-            width: `${Math.max(12, brushRadius * 6)}px`,
-            height: `${Math.max(12, brushRadius * 6)}px`,
-            left: `${(cursorPos.x / width) * 100}%`,
-            top: `${(cursorPos.y / height) * 100}%`,
-            transform: 'translate(-50%, -50%)',
-          }}
+    <div className="relative w-full h-full flex items-center justify-center overflow-hidden select-none touch-none bg-slate-950 p-2 sm:p-4">
+      {/* Aspect-Ratio Preserving Stage Wrapper */}
+      <div
+        className="relative flex items-center justify-center shadow-2xl rounded-lg border border-slate-800 bg-black overflow-hidden"
+        style={{
+          aspectRatio: `${width} / ${height}`,
+          maxWidth: '100%',
+          maxHeight: '100%',
+        }}
+      >
+        {/* Main Simulation Tank Canvas (WebGL Bloom / 2D fallback) */}
+        <canvas
+          ref={canvasRef}
+          id="simulation-canvas"
+          width={width}
+          height={height}
+          className="block w-full h-full cursor-crosshair rounded-lg"
+          style={{ imageRendering: 'pixelated' }}
+          onMouseDown={handlePointerDown}
+          onMouseMove={handlePointerMove}
+          onMouseUp={handlePointerUp}
+          onMouseLeave={handlePointerLeave}
+          onTouchStart={handlePointerDown}
+          onTouchMove={handlePointerMove}
+          onTouchEnd={handlePointerUp}
         />
-      )}
+
+        {/* Overlaid Particle System Canvas (Sparks, Smoke, Shockwaves) */}
+        <canvas
+          ref={overlayCanvasRef}
+          id="vfx-particle-overlay"
+          width={width}
+          height={height}
+          className="pointer-events-none absolute inset-0 w-full h-full rounded-lg"
+        />
+
+        {/* Exact Brush Indicator located INSIDE the stage wrapper */}
+        {cursorPos && (
+          <div
+            className="pointer-events-none absolute border border-sky-400/80 rounded-full bg-sky-400/15"
+            style={{
+              width: `${((brushRadius * 2 + 1) / width) * 100}%`,
+              height: `${((brushRadius * 2 + 1) / height) * 100}%`,
+              left: `${((cursorPos.x + 0.5) / width) * 100}%`,
+              top: `${((cursorPos.y + 0.5) / height) * 100}%`,
+              transform: 'translate(-50%, -50%)',
+            }}
+          />
+        )}
+      </div>
     </div>
   );
 };
