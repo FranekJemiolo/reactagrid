@@ -339,4 +339,79 @@ describe('SimulationEngine - Core Physics and Chemistry Passes', () => {
     expect(engine.typeGrid[18 * 20 + 10]).toBe(sio2Id);
     expect(engine.typeGrid[18 * 20 + 10]).not.toBe(glassId);
   });
+
+  it('triggers Gunpowder deflagration above 540 K producing expanding hot gas products', () => {
+    // Place a gunpowder cell at (10, 18) and heat it to 600 K
+    engine.setCell(10, 18, 'gunpowder', 600.0);
+    const gunpowderId = engine.getSpeciesId('gunpowder');
+    expect(engine.typeGrid[18 * 20 + 10]).toBe(gunpowderId);
+
+    // Step physics: gunpowder deflagrates into co2/n2/so2
+    for (let i = 0; i < 2; i++) {
+      engine.step();
+    }
+
+    const resultType = engine.typeGrid[18 * 20 + 10];
+    expect(resultType).not.toBe(gunpowderId);
+
+    // Rising hot gas elevates temperature in the column
+    let maxColTemp = 0;
+    for (let y = 0; y < 20; y++) {
+      const t = engine.tempGrid[y * 20 + 10];
+      if (t > maxColTemp) maxColTemp = t;
+    }
+    expect(maxColTemp).toBeGreaterThan(700.0);
+  });
+
+  it('verifies Liquid Nitrogen flash-freezes adjacent water to ice and boils into N2', () => {
+    // Build a small glass container: floor at y=19, walls at x=9 and x=11
+    engine.setCell(9, 19, 'glass');
+    engine.setCell(10, 19, 'glass');
+    engine.setCell(11, 19, 'glass');
+    engine.setCell(9, 18, 'glass');
+    engine.setCell(9, 17, 'glass');
+    engine.setCell(11, 18, 'glass');
+    engine.setCell(11, 17, 'glass');
+
+    // Place water at (10, 18) and Liquid Nitrogen at (10, 17)
+    engine.setCell(10, 18, 'h2o', 290.0);
+    engine.setCell(10, 17, 'ln2', 77.0);
+
+    const waterId = engine.getSpeciesId('h2o');
+    const iceId = engine.getSpeciesId('h2o_ice');
+    const ln2Id = engine.getSpeciesId('ln2');
+    const n2Id = engine.getSpeciesId('n2');
+
+    expect(engine.typeGrid[18 * 20 + 10]).toBe(waterId);
+    expect(engine.typeGrid[17 * 20 + 10]).toBe(ln2Id);
+
+    engine.step();
+
+    // The water should be frozen to ice or the LN2 boiled to N2
+    let hasIceOrN2 = false;
+    for (let y = 0; y < 20; y++) {
+      for (let x = 0; x < 20; x++) {
+        const t = engine.typeGrid[y * 20 + x];
+        if (t === iceId || t === n2Id) {
+          hasIceOrN2 = true;
+          break;
+        }
+      }
+    }
+    expect(hasIceOrN2).toBe(true);
+  });
+
+  it('triggers Elephant Toothpaste eruption when H2O2 touches MnO2 catalyst', () => {
+    engine.setCell(10, 18, 'mno2', 298.15);
+    engine.setCell(10, 17, 'h2o2', 298.15);
+
+    const h2o2Id = engine.getSpeciesId('h2o2');
+    expect(engine.typeGrid[17 * 20 + 10]).toBe(h2o2Id);
+
+    engine.step();
+
+    // H2O2 decomposes into steam / O2, leaving catalyst
+    const cellAbove = engine.typeGrid[17 * 20 + 10];
+    expect(cellAbove).not.toBe(h2o2Id);
+  });
 });

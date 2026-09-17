@@ -1,70 +1,234 @@
 items:
-  - item_id: 'item_tap_water'
-    name: 'Tap Water'
-    category: 'Household'
+  - item_id: item_tap_water
+    name: Tap Water
+    category: Basics
     cost: 0
     composition:
       h2o: 1.0
-  - item_id: 'item_ice_block'
-    name: 'Solid Ice Block'
-    category: 'Household'
-    cost: 5
-    composition:
-      h2o_ice: 1.0
-  - item_id: 'item_baking_soda'
-    name: 'Pure Baking Soda'
-    category: 'Household'
-    cost: 10
-    composition:
-      nahco3: 1.0
-  - item_id: 'item_distilled_vinegar'
-    name: 'Distilled White Vinegar'
-    category: 'Household'
-    cost: 15
-    composition:
-      ch3cooh: 0.08
-      h2o: 0.92
-  - item_id: 'item_household_bleach'
-    name: 'Household Bleach'
-    category: 'Cleaning'
-    cost: 25
-    composition:
-      naclo: 0.06
-      h2o: 0.94
-  - item_id: 'item_ammonia'
-    name: 'Pure Ammonia'
-    category: 'Cleaning'
-    cost: 30
-    composition:
-      nh3: 1.0
-  - item_id: 'item_window_cleaner'
-    name: 'Glass Cleaner'
-    category: 'Cleaning'
-    cost: 20
-    composition:
-      nh3: 0.05
-      h2o: 0.95
-  - item_id: 'item_iron_filings'
-    name: 'Pure Iron Filings'
-    category: 'Elements'
-    cost: 40
-    composition:
-      fe: 1.0
-  - item_id: 'item_metallic_sodium'
-    name: 'Pure Metallic Sodium'
-    category: 'Elements'
-    cost: 100
-    composition:
-      na: 1.0
-  - item_id: 'item_silica_sand'
-    name: 'Silica Sand'
-    category: 'Lab Supplies'
+  - item_id: item_play_sand
+    name: Play Sand
+    category: Basics
     cost: 5
     composition:
       sio2: 1.0
-  - item_id: 'item_potassium_block'
-    name: 'Pure Potassium'
-    category: 'Elements'
-    cost: 150
+  - item_id: item_lab_glass
+    name: Lab Glassware (Pyrex)
+    category: Basics
+    cost: 0
+    composition:
+      glass: 1.0
+  - item_id: item_baking_soda
+    name: Baking Soda
+    category: Household
+    cost: 10
+    composition:
+      nahco3: 1.0
+  - item_id: item_white_vinegar
+    name: White Vinegar
+    category: Household
+    cost: 15
+    composition:
+      ch3cooh: 0.05
+      h2o: 0.95
+  - item_id: item_iron_filings
+    name: Iron Filings
+    category: Metals
+    cost: 25
+    composition:
+      fe: 1.0
+  - item_id: item_household_bleach
+    name: Household Bleach
+    category: Cleaning
+    cost: 40
+    composition:
+      naclo: 0.05
+      h2o: 0.95
+  - item_id: item_window_cleaner
+    name: Window Cleaner
+    category: Cleaning
+    cost: 40
+    composition:
+      nh3: 0.05
+      h2o: 0.95
+  - item_id: item_sodium_metal
+    name: Metallic Sodium
+    category: Advanced
+    cost: 65
+    composition:
+      na: 1.0
+  - item_id: item_muriatic_acid
+    name: Muriatic Acid
+    category: Advanced
+    cost: 50
+    composition:
+      hcl: 0.2
+      h2o: 0.8
+  - item_id: item_charcoal
+    name: Activated Charcoal
+    category: Basics
+    cost: 12
+    composition:
+      c: 1.0
+  - item_id: item_quicklime
+    name: Quicklime
+    category: Advanced
+    cost: 35
+    composition:
+      cao: 1.0
+  - item_id: item_rubbing_alcohol
+    name: Rubbing Alcohol
+    category: Household
+    cost: 20
+    composition:
+      c2h5oh: 0.7
+      h2o: 0.3
+  - item_id: item_bunsen_burner
+    name: Bunsen Burner
+    category: Equipment
+    cost: 15
+    composition:
+      bunsen_burner: 1.0
+  - item_id: item_cooling_plate
+    name: Cooling Plate
+    category: Equipment
+    cost: 15
+    composition:
+      cooling_plate: 1.0
+  - item_id: item_stirrer
+    name: Magnetic Stirrer
+    category: Equipment
+    cost: 15
+    composition:
+      stirrer: 1.0
+  - item_id: item_ice_block
+    name: Solid Ice Block
+    category: Basics
+    cost: 5
+    composition:
+      h2o_ice: 1.0
+  - item_id: item_ammonia
+    name: Ammonia Gas
+    category: Cleaning
+    cost: 25
+    composition:
+      nh3: 1.0
+  - item_id: item_oxygen_gas
+    name: Compressed Oxygen
+    category: Advanced
+    cost: 30
+    composition:
+      o2: 1.0
+  - item_id: item_table_salt
+    name: Pure Table Salt
+    category: Basics
+    cost: 0
+    composition:
+      nacl: 1.0
+  - item_id: item_sugar
+    name: Pure Cane Sugar
+    category: Basics
+    cost: 5
+    composition:
+      c12h22o11: 1.0
+  - item_id: item_dry_ice
+    name: Dry Ice Pellets
+    category: Cryo
+    cost: 5
+    composition:
+      co2_ice: 1.0
+  - item_id: item_lamp_oil
+    name: Kerosene Lamp Oil
+    category: Fluids
+    cost: 5
+    composition:
+      oil: 1.0
+  - item_id: item_chalk
+    name: Chalk Powder
+    category: Basics
+    cost: 5
+    composition:
+      caco3: 1.0
+  - item_id: item_gunpowder
+    name: Black Powder (Gunpowder)
+    category: Pyrotechnics
+    cost: 10
+    composition:
+      gunpowder: 1.0
+  - item_id: item_magnesium
+    name: Magnesium Metal Strip
+    category: Pyrotechnics
+    cost: 10
+    composition:
+      mg: 1.0
+  - item_id: item_liquid_nitrogen
+    name: Liquid Nitrogen Dewar
+    category: Cryo
+    cost: 10
+    composition:
+      ln2: 1.0
+  - item_id: item_sulfur
+    name: Brimstone Sulfur Powder
+    category: Pyrotechnics
+    cost: 5
+    composition:
+      s: 1.0
+  - item_id: item_potassium_nitrate
+    name: "Saltpeter (KNO\u2083)"
+    category: Pyrotechnics
+    cost: 10
+    composition:
+      kno3: 1.0
+  - item_id: item_aluminium_powder
+    name: Aluminium Metal Powder
+    category: Metals
+    cost: 10
+    composition:
+      al: 1.0
+  - item_id: item_copper_metal
+    name: Pure Copper Powder
+    category: Metals
+    cost: 10
+    composition:
+      cu: 1.0
+  - item_id: item_hydrogen_peroxide
+    name: Concentrated Peroxide (30%)
+    category: Advanced
+    cost: 10
+    composition:
+      h2o2: 1.0
+  - item_id: item_manganese_dioxide
+    name: Manganese Dioxide Catalyst
+    category: Advanced
+    cost: 10
+    composition:
+      mno2: 1.0
+  - item_id: item_glycerin
+    name: Pure Glycerin Syrupy Fluid
+    category: Fluids
+    cost: 10
+    composition:
+      c3h8o3: 1.0
+  - item_id: item_potassium_permanganate
+    name: Potassium Permanganate
+    category: Advanced
+    cost: 10
+    composition:
+      kmno4: 1.0
+  - item_id: item_sulfuric_acid
+    name: Concentrated Sulfuric Acid
+    category: Advanced
+    cost: 15
+    composition:
+      h2so4: 1.0
+  - item_id: item_volcanic_lava
+    name: Volcanic Magma / Lava
+    category: Advanced
+    cost: 15
+    composition:
+      lava: 1.0
+  - item_id: item_potassium_metal
+    name: Metallic Potassium
+    category: Metals
+    cost: 20
     composition:
       k: 1.0

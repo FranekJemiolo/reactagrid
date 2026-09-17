@@ -334,7 +334,380 @@ RAW_INGESTION_DATA: List[Dict[str, Any]] = [
         "discovery_reward": 40,
         "tags": ["redox", "exothermic", "corrosion"],
         "description": "Copper slowly passivates in oxygen forming an inert protective oxide layer."
-    }
+    },
+    {
+        "id": "gunpowder_deflagration",
+        "name": "Black Powder Deflagration",
+        "reactants": [
+                "gunpowder"
+        ],
+        "products": [
+                "co2",
+                "n2",
+                "so2"
+        ],
+        "heat_yield_kj_mol": 485.0,
+        "temperature_delta_k": 450.0,
+        "activation_energy_k": 540.0,
+        "probability": 0.95,
+        "pressure_release": 4.0,
+        "category": "Combustion",
+        "discovery_reward": 75,
+        "tags": [
+                "pyrotechnics",
+                "explosive",
+                "gas_evolution",
+                "exothermic"
+        ],
+        "description": "Black powder ignites fiercely above 540 K, generating smoke, sparks, and intense gas pressure."
+},
+    {
+        "id": "magnesium_combustion",
+        "name": "Magnesium Blinding White Combustion",
+        "reactants": [
+                "mg",
+                "o2"
+        ],
+        "products": [
+                "mgo"
+        ],
+        "heat_yield_kj_mol": 601.6,
+        "temperature_delta_k": 650.0,
+        "activation_energy_k": 750.0,
+        "probability": 0.9,
+        "pressure_release": 1.5,
+        "category": "Combustion",
+        "discovery_reward": 80,
+        "tags": [
+                "pyrotechnics",
+                "incandescent",
+                "exothermic",
+                "oxidation"
+        ],
+        "description": "Magnesium metal burns with an intense, blinding white glow, depositing white magnesium oxide ash."
+},
+    {
+        "id": "magnesium_steam_reaction",
+        "name": "Magnesium & Steam Vigorous Reaction",
+        "reactants": [
+                "mg",
+                "h2o_steam"
+        ],
+        "products": [
+                "mgo",
+                "h2"
+        ],
+        "heat_yield_kj_mol": 359.0,
+        "temperature_delta_k": 320.0,
+        "activation_energy_k": 580.0,
+        "probability": 0.85,
+        "pressure_release": 2.5,
+        "category": "Redox",
+        "discovery_reward": 85,
+        "tags": [
+                "redox",
+                "hydrogen_evolution",
+                "exothermic"
+        ],
+        "description": "Hot magnesium rips oxygen atoms from steam, releasing flammable hydrogen gas."
+},
+    {
+        "id": "sulfur_combustion",
+        "name": "Elemental Sulfur Blue Flame Burning",
+        "reactants": [
+                "s",
+                "o2"
+        ],
+        "products": [
+                "so2"
+        ],
+        "heat_yield_kj_mol": 296.8,
+        "temperature_delta_k": 180.0,
+        "activation_energy_k": 520.0,
+        "probability": 0.8,
+        "pressure_release": 1.0,
+        "category": "Combustion",
+        "discovery_reward": 60,
+        "tags": [
+                "combustion",
+                "gas_evolution",
+                "exothermic"
+        ],
+        "description": "Sulfur melts and burns with an ethereal blue flame into pungent sulfur dioxide gas."
+},
+    {
+        "id": "thermite_reaction",
+        "name": "Thermite Superheated Molten Reaction",
+        "reactants": [
+                "al",
+                "fe2o3"
+        ],
+        "products": [
+                "fe",
+                "al2o3"
+        ],
+        "heat_yield_kj_mol": 851.5,
+        "temperature_delta_k": 750.0,
+        "activation_energy_k": 720.0,
+        "probability": 0.9,
+        "pressure_release": 2.5,
+        "category": "Exothermic Redox",
+        "discovery_reward": 120,
+        "tags": [
+                "pyrotechnics",
+                "extreme_heat",
+                "exothermic",
+                "redox"
+        ],
+        "description": "Aluminium powder aggressively reduces iron oxide in a blinding, incandescent molten flash."
+},
+    {
+        "id": "liquid_nitrogen_boil",
+        "name": "Cryogenic Liquid Nitrogen Rapid Boil",
+        "reactants": [
+                "ln2"
+        ],
+        "products": [
+                "n2"
+        ],
+        "heat_yield_kj_mol": -5.5,
+        "temperature_delta_k": -50.0,
+        "activation_energy_k": 77.5,
+        "probability": 0.98,
+        "pressure_release": 2.0,
+        "category": "Phase Transition",
+        "discovery_reward": 40,
+        "tags": [
+                "cryogenic",
+                "phase_transition",
+                "endothermic"
+        ],
+        "description": "Liquid nitrogen boils frantically at ambient room temperatures, leaving inert cold nitrogen gas."
+},
+    {
+        "id": "liquid_nitrogen_freeze_water",
+        "name": "Cryogenic Flash Freezing (Water to Ice)",
+        "reactants": [
+                "ln2",
+                "h2o"
+        ],
+        "products": [
+                "n2",
+                "h2o_ice"
+        ],
+        "heat_yield_kj_mol": -12.0,
+        "temperature_delta_k": -85.0,
+        "activation_energy_k": 75.0,
+        "probability": 0.95,
+        "pressure_release": 1.5,
+        "category": "Cryogenic Quench",
+        "discovery_reward": 60,
+        "tags": [
+                "cryogenic",
+                "flash_freeze",
+                "endothermic"
+        ],
+        "description": "Liquid nitrogen rapidly boils away while instantly freezing liquid water into solid ice."
+},
+    {
+        "id": "dry_ice_sublimation",
+        "name": "Dry Ice Direct Sublimation",
+        "reactants": [
+                "co2_ice"
+        ],
+        "products": [
+                "co2"
+        ],
+        "heat_yield_kj_mol": -25.2,
+        "temperature_delta_k": -30.0,
+        "activation_energy_k": 195.0,
+        "probability": 0.95,
+        "pressure_release": 1.8,
+        "category": "Phase Transition",
+        "discovery_reward": 40,
+        "tags": [
+                "cryogenic",
+                "sublimation",
+                "endothermic"
+        ],
+        "description": "Solid carbon dioxide sublimates directly into heavy, suffocating carbon dioxide gas."
+},
+    {
+        "id": "oil_combustion",
+        "name": "Lamp Oil / Hydrocarbon Combustion",
+        "reactants": [
+                "oil",
+                "o2"
+        ],
+        "products": [
+                "co2",
+                "h2o_steam"
+        ],
+        "heat_yield_kj_mol": 650.0,
+        "temperature_delta_k": 280.0,
+        "activation_energy_k": 530.0,
+        "probability": 0.85,
+        "pressure_release": 1.5,
+        "category": "Combustion",
+        "discovery_reward": 50,
+        "tags": [
+                "combustion",
+                "fuel",
+                "exothermic"
+        ],
+        "description": "Floating hydrocarbon fuel catches fire, forming an intense spreading surface slick."
+},
+    {
+        "id": "permanganate_glycerin_hypergolic",
+        "name": "Hypergolic Permanganate & Glycerin Fire",
+        "reactants": [
+                "kmno4",
+                "c3h8o3"
+        ],
+        "products": [
+                "co2",
+                "h2o_steam"
+        ],
+        "heat_yield_kj_mol": 420.0,
+        "temperature_delta_k": 450.0,
+        "activation_energy_k": 295.0,
+        "probability": 0.45,
+        "pressure_release": 2.5,
+        "category": "Hypergolic Redox",
+        "discovery_reward": 100,
+        "tags": [
+                "hypergolic",
+                "spontaneous",
+                "exothermic",
+                "redox"
+        ],
+        "description": "Spontaneous delay reaction: purple permanganate oxidizes syrupy glycerin into a roaring purple flare."
+},
+    {
+        "id": "elephant_toothpaste",
+        "name": "Elephant Toothpaste Catalytic Eruption",
+        "reactants": [
+                "h2o2",
+                "mno2"
+        ],
+        "products": [
+                "h2o_steam",
+                "o2"
+        ],
+        "heat_yield_kj_mol": 196.4,
+        "temperature_delta_k": 120.0,
+        "activation_energy_k": 285.0,
+        "probability": 0.85,
+        "pressure_release": 3.5,
+        "category": "Catalysis",
+        "discovery_reward": 90,
+        "tags": [
+                "catalysis",
+                "gas_evolution",
+                "exothermic"
+        ],
+        "description": "Manganese dioxide catalyzes the rapid decomposition of hydrogen peroxide into expanding steam and oxygen."
+},
+    {
+        "id": "sugar_sulfuric_acid_snake",
+        "name": "Sulfuric Acid Sugar Dehydration (Carbon Snake)",
+        "reactants": [
+                "c12h22o11",
+                "h2so4"
+        ],
+        "products": [
+                "c",
+                "h2o_steam"
+        ],
+        "heat_yield_kj_mol": 380.0,
+        "temperature_delta_k": 160.0,
+        "activation_energy_k": 295.0,
+        "probability": 0.75,
+        "pressure_release": 2.8,
+        "category": "Dehydration",
+        "discovery_reward": 95,
+        "tags": [
+                "dehydration",
+                "exothermic",
+                "acid"
+        ],
+        "description": "Concentrated sulfuric acid greedily strips water from sucrose, leaving an expanding column of hot black carbon."
+},
+    {
+        "id": "potassium_water_explosion",
+        "name": "Potassium & Water Alkali Blast",
+        "reactants": [
+                "k",
+                "h2o"
+        ],
+        "products": [
+                "koh",
+                "h2"
+        ],
+        "heat_yield_kj_mol": 196.0,
+        "temperature_delta_k": 350.0,
+        "activation_energy_k": 273.0,
+        "probability": 0.95,
+        "pressure_release": 3.8,
+        "category": "Exothermic Redox",
+        "discovery_reward": 110,
+        "tags": [
+                "alkali_metal",
+                "explosion",
+                "hydrogen_evolution",
+                "exothermic"
+        ],
+        "description": "Potassium violently hydrolyzes water, detonating with an iconic lilac flame."
+},
+    {
+        "id": "lava_water_quench",
+        "name": "Volcanic Lava & Water Thermal Quench",
+        "reactants": [
+                "lava",
+                "h2o"
+        ],
+        "products": [
+                "basalt",
+                "h2o_steam"
+        ],
+        "heat_yield_kj_mol": 150.0,
+        "temperature_delta_k": 120.0,
+        "activation_energy_k": 373.0,
+        "probability": 0.95,
+        "pressure_release": 3.0,
+        "category": "Thermal Quench",
+        "discovery_reward": 70,
+        "tags": [
+                "volcanic",
+                "quench",
+                "steam_explosion"
+        ],
+        "description": "1400 K volcanic lava flash-boils water into high-pressure steam while solidifying into obsidian rock."
+},
+    {
+        "id": "copper_oxidation",
+        "name": "Copper High-Temperature Oxidation",
+        "reactants": [
+                "cu",
+                "o2"
+        ],
+        "products": [
+                "cuo"
+        ],
+        "heat_yield_kj_mol": 157.3,
+        "temperature_delta_k": 80.0,
+        "activation_energy_k": 550.0,
+        "probability": 0.6,
+        "pressure_release": 0.0,
+        "category": "Redox",
+        "discovery_reward": 55,
+        "tags": [
+                "redox",
+                "corrosion",
+                "metal"
+        ],
+        "description": "Reddish copper metal oxidizes under flame heat into dull black copper(II) oxide."
+}
 ]
 
 def fetch_ord_reactions(tags: Optional[List[str]] = None) -> List[Dict[str, Any]]:

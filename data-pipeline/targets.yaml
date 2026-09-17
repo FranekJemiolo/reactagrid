@@ -1,139 +1,461 @@
 molecules:
-  - id: 'h2o'
-    cas: '7732-18-5'
-    formula: 'H2O'
-    name: 'Water'
-    color_hex: '#3498db'
-  - id: 'h2o_ice'
-    cas: '7732-18-5'
-    formula: 'H2O'
-    name: 'Water Ice'
-    color_hex: '#a5f3fc'
-  - id: 'steam'
-    cas: '7732-18-5'
-    formula: 'H2O'
-    name: 'Water Vapor (Steam)'
-    color_hex: '#cbd5e1'
-  - id: 'ch3cooh'
-    cas: '64-19-7'
-    formula: 'CH3COOH'
-    name: 'Acetic Acid (Vinegar)'
-    color_hex: '#fde047'
-  - id: 'nahco3'
-    cas: '144-55-8'
-    formula: 'NaHCO3'
-    name: 'Sodium Bicarbonate (Baking Soda)'
-    color_hex: '#f8fafc'
-  - id: 'ch3coona'
-    cas: '127-09-3'
-    formula: 'CH3COONa'
-    name: 'Sodium Acetate'
-    color_hex: '#fed7aa'
-  - id: 'co2'
-    cas: '124-38-9'
-    formula: 'CO2'
-    name: 'Carbon Dioxide'
-    color_hex: '#94a3b8'
-  - id: 'naclo'
-    cas: '7681-52-9'
-    formula: 'NaClO'
-    name: 'Sodium Hypochlorite (Bleach)'
-    color_hex: '#a7f3d0'
-  - id: 'nh3'
-    cas: '7664-41-7'
-    formula: 'NH3'
-    name: 'Ammonia'
-    color_hex: '#67e8f9'
-  - id: 'nh2cl'
-    cas: '10599-90-3'
-    formula: 'NH2Cl'
-    name: 'Chloramine'
-    color_hex: '#facc15'
-  - id: 'naoh'
-    cas: '1310-73-2'
-    formula: 'NaOH'
-    name: 'Sodium Hydroxide (Lye)'
-    color_hex: '#e2e8f0'
-  - id: 'na'
-    cas: '7440-23-5'
-    formula: 'Na'
-    name: 'Metallic Sodium'
-    color_hex: '#e0e7ff'
-  - id: 'h2'
-    cas: '1333-74-0'
-    formula: 'H2'
-    name: 'Hydrogen Gas'
-    color_hex: '#f1f5f9'
-  - id: 'o2'
-    cas: '7782-44-7'
-    formula: 'O2'
-    name: 'Oxygen Gas'
-    color_hex: '#38bdf8'
-  - id: 'fe'
-    cas: '7439-89-6'
-    formula: 'Fe'
-    name: 'Iron Filings'
-    color_hex: '#9ca3af'
-  - id: 'fe2o3'
-    cas: '1309-37-1'
-    formula: 'Fe2O3'
-    name: 'Iron(III) Oxide (Rust)'
-    color_hex: '#b45309'
-  - id: 'sio2'
-    cas: '14808-60-7'
-    formula: 'SiO2'
-    name: 'Silica Sand'
-    color_hex: '#fde68a'
-  - id: 'c12h22o11'
-    cas: '57-50-1'
-    formula: 'C12H22O11'
-    name: 'Sucrose (Table Sugar)'
-    color_hex: '#ffffff'
-  - id: 'c'
-    cas: '7440-44-0'
-    formula: 'C'
-    name: 'Carbon Foam / Char'
-    color_hex: '#1f2937'
-  - id: 'h2so4'
-    cas: '7664-93-9'
-    formula: 'H2SO4'
-    name: 'Sulfuric Acid'
-    color_hex: '#fef08a'
-  - id: 'h2o2'
-    cas: '7722-84-1'
-    formula: 'H2O2'
-    name: 'Hydrogen Peroxide'
-    color_hex: '#e0f2fe'
-  - id: 'mno2'
-    cas: '1313-13-9'
-    formula: 'MnO2'
-    name: 'Manganese Dioxide'
-    color_hex: '#374151'
-  - id: 'k'
-    cas: '7440-09-7'
-    formula: 'K'
-    name: 'Metallic Potassium'
-    color_hex: '#bdc3c7'
-
+  - id: h2o
+    name: Water
+    formula: "H\u2082O"
+    color_hex: '#388bfd99'
+  - id: h2o_steam
+    name: Water Vapor (Steam)
+    formula: "H\u2082O (g)"
+    color_hex: '#cad9e688'
+  - id: h2o_ice
+    name: Ice
+    formula: "H\u2082O (s)"
+    color_hex: '#cbf1f5cc'
+  - id: sio2
+    name: Silica (Sand)
+    formula: "SiO\u2082"
+    color_hex: '#d4a373ff'
+  - id: glass
+    name: Borosilicate Glass (Pyrex)
+    formula: "SiO\u2082\xB7B\u2082O\u2083"
+    color_hex: '#94a3b8b0'
+  - id: nahco3
+    name: Sodium Bicarbonate (Baking Soda)
+    formula: "NaHCO\u2083"
+    color_hex: '#f8f9faee'
+  - id: ch3cooh
+    name: Acetic Acid (Vinegar)
+    formula: "CH\u2083COOH"
+    color_hex: '#e2e8f0aa'
+  - id: fe
+    name: Iron Filings
+    formula: Fe
+    color_hex: '#6c757dff'
+  - id: o2
+    name: Oxygen
+    formula: "O\u2082"
+    color_hex: '#70c1b355'
+  - id: naclo
+    name: Sodium Hypochlorite (Bleach)
+    formula: NaClO
+    color_hex: '#a7f3d0bb'
+  - id: nh3
+    name: Ammonia (Window Cleaner)
+    formula: "NH\u2083"
+    color_hex: '#93c5fd88'
+  - id: ch3coona
+    name: Sodium Acetate
+    formula: "CH\u2083COONa"
+    color_hex: '#fed7aaee'
+  - id: co2
+    name: Carbon Dioxide
+    formula: "CO\u2082"
+    color_hex: '#94a3b866'
+  - id: fe2o3
+    name: Iron(III) Oxide (Rust)
+    formula: "Fe\u2082O\u2083"
+    color_hex: '#b45309ff'
+  - id: nh2cl
+    name: Chloramine Gas
+    formula: "NH\u2082Cl"
+    color_hex: '#bef264aa'
+  - id: naoh
+    name: Sodium Hydroxide (Lye / Caustic Soda)
+    formula: NaOH
+    color_hex: '#f1f5f9ee'
+  - id: na
+    name: Sodium Metal
+    formula: Na
+    color_hex: '#e2e8f0ff'
+  - id: h2
+    name: Hydrogen Gas
+    formula: "H\u2082"
+    color_hex: '#fbcfe855'
+  - id: hcl
+    name: Hydrochloric Acid (Muriatic Acid)
+    formula: HCl
+    color_hex: '#fef08acc'
+  - id: nacl
+    name: Sodium Chloride (Table Salt)
+    formula: NaCl
+    color_hex: '#f8fafcee'
+  - id: c
+    name: Carbon (Charcoal)
+    formula: C
+    color_hex: '#1e293bff'
+  - id: ch4
+    name: Methane (Natural Gas)
+    formula: "CH\u2084"
+    color_hex: '#bfdbfe66'
+  - id: c2h5oh
+    name: Ethanol (Alcohol)
+    formula: "C\u2082H\u2085OH"
+    color_hex: '#a5f3fc99'
+  - id: h2o2
+    name: Hydrogen Peroxide
+    formula: "H\u2082O\u2082"
+    color_hex: '#bae6fd99'
+  - id: cao
+    name: Calcium Oxide (Quicklime)
+    formula: CaO
+    color_hex: '#e0e7ffee'
+  - id: ca_oh_2
+    name: Calcium Hydroxide (Slaked Lime)
+    formula: "Ca(OH)\u2082"
+    color_hex: '#f3e8ffee'
+  - id: caco3
+    name: Calcium Carbonate (Chalk / Limestone)
+    formula: "CaCO\u2083"
+    color_hex: '#fed7aaff'
+  - id: cu
+    name: Copper Filings
+    formula: Cu
+    color_hex: '#d97706ff'
+  - id: cl2
+    name: Chlorine Gas
+    formula: "Cl\u2082"
+    color_hex: '#bef26488'
+  - id: bunsen_burner
+    name: Bunsen Burner
+    formula: Heat Source
+    color_hex: '#f97316ff'
+  - id: cooling_plate
+    name: Cooling Plate
+    formula: Heat Sink
+    color_hex: '#06b6d4ff'
+  - id: stirrer
+    name: Magnetic Stirrer
+    formula: Agitator
+    color_hex: '#a855f7ff'
+  - id: h2o_gas
+    name: Water Vapor (Steam)
+    formula: "H\u2082O (g)"
+    color_hex: '#cad9e688'
+  - id: h2_gas
+    name: Hydrogen Gas
+    formula: "H\u2082 (g)"
+    color_hex: '#e0f2fe66'
+  - id: gunpowder
+    name: Black Powder (Gunpowder)
+    formula: "KNO\u2083+C+S"
+    color_hex: '#27272aff'
+  - id: kno3
+    name: Potassium Nitrate (Saltpeter)
+    formula: "KNO\u2083"
+    color_hex: '#f1f5f9ff'
+  - id: s
+    name: Elemental Sulfur
+    formula: "S\u2088"
+    color_hex: '#eab308ff'
+  - id: so2
+    name: Sulfur Dioxide
+    formula: "SO\u2082"
+    color_hex: '#fef08a88'
+  - id: n2
+    name: Nitrogen Gas
+    formula: "N\u2082"
+    color_hex: '#cbd5e144'
+  - id: mg
+    name: Magnesium Metal
+    formula: Mg
+    color_hex: '#e2e8f0ff'
+  - id: mgo
+    name: Magnesium Oxide (Magnesia)
+    formula: MgO
+    color_hex: '#ffffffef'
+  - id: al
+    name: Aluminium Powder
+    formula: Al
+    color_hex: '#cbd5e1ff'
+  - id: al2o3
+    name: Aluminium Oxide (Corundum)
+    formula: "Al\u2082O\u2083"
+    color_hex: '#f8fafcff'
+  - id: ln2
+    name: Liquid Nitrogen
+    formula: "N\u2082 (l)"
+    color_hex: '#93c5fd99'
+  - id: co2_ice
+    name: Dry Ice
+    formula: "CO\u2082 (s)"
+    color_hex: '#f1f5f9ee'
+  - id: oil
+    name: Lamp Oil (Hydrocarbon)
+    formula: "C\u2081\u2082H\u2082\u2086"
+    color_hex: '#f59e0baa'
+  - id: c3h8o3
+    name: Glycerin (Glycerol)
+    formula: "C\u2083H\u2088O\u2083"
+    color_hex: '#f8fafcbb'
+  - id: kmno4
+    name: Potassium Permanganate
+    formula: "KMnO\u2084"
+    color_hex: '#581c87ff'
+  - id: h2so4
+    name: Concentrated Sulfuric Acid
+    formula: "H\u2082SO\u2084"
+    color_hex: '#fef08acc'
+  - id: c12h22o11
+    name: Table Sugar (Sucrose)
+    formula: "C\u2081\u2082H\u2082\u2082O\u2081\u2081"
+    color_hex: '#ffffffea'
+  - id: lava
+    name: Volcanic Magma / Lava
+    formula: Molten Rock
+    color_hex: '#ea580cff'
+  - id: basalt
+    name: Basalt (Cooled Lava)
+    formula: Basalt Rock
+    color_hex: '#334155ff'
+  - id: k
+    name: Metallic Potassium
+    formula: K
+    color_hex: '#d8b4feff'
+  - id: koh
+    name: Potassium Hydroxide
+    formula: KOH
+    color_hex: '#f3e8ffff'
+  - id: mno2
+    name: Manganese Dioxide
+    formula: "MnO\u2082"
+    color_hex: '#1c1917ff'
+  - id: cuo
+    name: Copper(II) Oxide
+    formula: CuO
+    color_hex: '#1e293bff'
 tracked_reactions:
-  - id: 'volcano_effervescence'
-    reactants: ['nahco3', 'ch3cooh']
-    products: ['ch3coona', 'h2o', 'co2']
-  - id: 'bleach_ammonia_chloramine'
-    reactants: ['naclo', 'nh3']
-    products: ['nh2cl', 'naoh']
-  - id: 'iron_oxidation'
-    reactants: ['fe', 'h2o', 'o2']
-    products: ['fe2o3']
-  - id: 'sodium_water_blast'
-    reactants: ['na', 'h2o']
-    products: ['naoh', 'h2']
-  - id: 'sugar_carbonization'
-    reactants: ['c12h22o11', 'h2so4']
-    products: ['c', 'steam', 'h2so4']
-  - id: 'peroxide_catalytic_decomposition'
-    reactants: ['h2o2', 'mno2']
-    products: ['steam', 'o2', 'mno2']
-  - id: 'potassium_water_explosion'
-    reactants: ['k', 'h2o']
-    products: ['naoh', 'h2']
+  - id: volcano_effervescence
+    reactants:
+      - nahco3
+      - ch3cooh
+    products:
+      - ch3coona
+      - h2o
+      - co2
+  - id: iron_slow_oxidation
+    reactants:
+      - fe
+      - h2o
+      - o2
+    products:
+      - fe2o3
+  - id: bleach_ammonia_hazard
+    reactants:
+      - naclo
+      - nh3
+    products:
+      - nh2cl
+      - naoh
+  - id: sodium_water_explosion
+    reactants:
+      - na
+      - h2o
+    products:
+      - naoh
+      - h2
+  - id: hydrogen_oxygen_combustion
+    reactants:
+      - h2
+      - o2
+    products:
+      - h2o_steam
+  - id: methane_combustion
+    reactants:
+      - ch4
+      - o2
+    products:
+      - co2
+      - h2o_steam
+  - id: ethanol_combustion
+    reactants:
+      - c2h5oh
+      - o2
+    products:
+      - co2
+      - h2o_steam
+  - id: peroxide_decomposition
+    reactants:
+      - h2o2
+      - fe
+    products:
+      - h2o
+      - o2
+  - id: carbon_charcoal_burning
+    reactants:
+      - c
+      - o2
+    products:
+      - co2
+  - id: quicklime_hydration
+    reactants:
+      - cao
+      - h2o
+    products:
+      - ca_oh_2
+  - id: slaked_lime_carbonation
+    reactants:
+      - ca_oh_2
+      - co2
+    products:
+      - caco3
+      - h2o
+  - id: chalk_acid_effervescence
+    reactants:
+      - caco3
+      - ch3cooh
+    products:
+      - co2
+      - h2o
+  - id: neutralization_lye_muriatic
+    reactants:
+      - naoh
+      - hcl
+    products:
+      - nacl
+      - h2o
+  - id: bicarb_muriatic_fizz
+    reactants:
+      - nahco3
+      - hcl
+    products:
+      - nacl
+      - h2o
+      - co2
+  - id: bleach_acid_chlorine_hazard
+    reactants:
+      - naclo
+      - hcl
+    products:
+      - cl2
+      - nacl
+      - h2o
+  - id: water_steam_phase_change
+    reactants:
+      - h2o
+    products:
+      - h2o_steam
+  - id: steam_condensation
+    reactants:
+      - h2o_steam
+    products:
+      - h2o
+  - id: water_freezing
+    reactants:
+      - h2o
+    products:
+      - h2o_ice
+  - id: ice_melting
+    reactants:
+      - h2o_ice
+    products:
+      - h2o
+  - id: iron_muriatic_hydrogen
+    reactants:
+      - fe
+      - hcl
+    products:
+      - h2
+  - id: copper_slow_oxidation
+    reactants:
+      - cu
+      - o2
+    products:
+      - sio2
+  - id: gunpowder_deflagration
+    reactants:
+      - gunpowder
+    products:
+      - co2
+      - n2
+      - so2
+  - id: magnesium_combustion
+    reactants:
+      - mg
+      - o2
+    products:
+      - mgo
+  - id: magnesium_steam_reaction
+    reactants:
+      - mg
+      - h2o_steam
+    products:
+      - mgo
+      - h2
+  - id: sulfur_combustion
+    reactants:
+      - s
+      - o2
+    products:
+      - so2
+  - id: thermite_reaction
+    reactants:
+      - al
+      - fe2o3
+    products:
+      - fe
+      - al2o3
+  - id: liquid_nitrogen_boil
+    reactants:
+      - ln2
+    products:
+      - n2
+  - id: liquid_nitrogen_freeze_water
+    reactants:
+      - ln2
+      - h2o
+    products:
+      - n2
+      - h2o_ice
+  - id: dry_ice_sublimation
+    reactants:
+      - co2_ice
+    products:
+      - co2
+  - id: oil_combustion
+    reactants:
+      - oil
+      - o2
+    products:
+      - co2
+      - h2o_steam
+  - id: permanganate_glycerin_hypergolic
+    reactants:
+      - kmno4
+      - c3h8o3
+    products:
+      - co2
+      - h2o_steam
+  - id: elephant_toothpaste
+    reactants:
+      - h2o2
+      - mno2
+    products:
+      - h2o_steam
+      - o2
+  - id: sugar_sulfuric_acid_snake
+    reactants:
+      - c12h22o11
+      - h2so4
+    products:
+      - c
+      - h2o_steam
+  - id: potassium_water_explosion
+    reactants:
+      - k
+      - h2o
+    products:
+      - koh
+      - h2
+  - id: lava_water_quench
+    reactants:
+      - lava
+      - h2o
+    products:
+      - basalt
+      - h2o_steam
+  - id: copper_oxidation
+    reactants:
+      - cu
+      - o2
+    products:
+      - cuo

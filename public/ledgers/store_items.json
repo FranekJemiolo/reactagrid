@@ -322,5 +322,309 @@
     ],
     "primary_compound": "o2",
     "icon": "Wind"
+  },
+  {
+    "id": "item_table_salt",
+    "name": "Pure Table Salt",
+    "category": "Basics",
+    "cost": 0,
+    "description": "Fine crystalline sodium chloride (100% NaCl). Benign mineral granules; completely free starter material.",
+    "unlocked_by_default": true,
+    "composition": [
+      {
+        "compound": "nacl",
+        "percentage": 100
+      }
+    ],
+    "primary_compound": "nacl",
+    "icon": "Sparkles"
+  },
+  {
+    "id": "item_sugar",
+    "name": "Pure Cane Sugar",
+    "category": "Basics",
+    "cost": 5,
+    "description": "Pure granulated sucrose (100% C₁₂H₂₂O₁₁). Melts into caramel or chars when contacting sulfuric acid.",
+    "unlocked_by_default": true,
+    "composition": [
+      {
+        "compound": "c12h22o11",
+        "percentage": 100
+      }
+    ],
+    "primary_compound": "c12h22o11",
+    "icon": "Box"
+  },
+  {
+    "id": "item_dry_ice",
+    "name": "Dry Ice Pellets",
+    "category": "Cryo",
+    "cost": 5,
+    "description": "Solid carbon dioxide (100% CO₂ Ice). Sublimates directly at 195 K into expanding cold vapor.",
+    "unlocked_by_default": true,
+    "composition": [
+      {
+        "compound": "co2_ice",
+        "percentage": 100
+      }
+    ],
+    "primary_compound": "co2_ice",
+    "icon": "Snowflake"
+  },
+  {
+    "id": "item_lamp_oil",
+    "name": "Kerosene Lamp Oil",
+    "category": "Fluids",
+    "cost": 5,
+    "description": "Refined hydrocarbon fuel oil (100% Oil). Floats on water surfaces and catches fire vigorously.",
+    "unlocked_by_default": true,
+    "composition": [
+      {
+        "compound": "oil",
+        "percentage": 100
+      }
+    ],
+    "primary_compound": "oil",
+    "icon": "Flame"
+  },
+  {
+    "id": "item_chalk",
+    "name": "Chalk Powder",
+    "category": "Basics",
+    "cost": 5,
+    "description": "Fine calcium carbonate powder (100% CaCO₃). Fizzes actively when exposed to acids.",
+    "unlocked_by_default": true,
+    "composition": [
+      {
+        "compound": "caco3",
+        "percentage": 100
+      }
+    ],
+    "primary_compound": "caco3",
+    "icon": "CircleDot"
+  },
+  {
+    "id": "item_gunpowder",
+    "name": "Black Powder (Gunpowder)",
+    "category": "Pyrotechnics",
+    "cost": 10,
+    "description": "Granular pyrotechnic deflagration mix (100% Gunpowder). Explodes violently with high gas pressure.",
+    "unlocked_by_default": false,
+    "composition": [
+      {
+        "compound": "gunpowder",
+        "percentage": 100
+      }
+    ],
+    "primary_compound": "gunpowder",
+    "icon": "Bomb"
+  },
+  {
+    "id": "item_magnesium",
+    "name": "Magnesium Metal Strip",
+    "category": "Pyrotechnics",
+    "cost": 10,
+    "description": "Pure elemental magnesium (100% Mg). Burns with blinding incandescent white brilliance.",
+    "unlocked_by_default": false,
+    "composition": [
+      {
+        "compound": "mg",
+        "percentage": 100
+      }
+    ],
+    "primary_compound": "mg",
+    "icon": "Zap"
+  },
+  {
+    "id": "item_liquid_nitrogen",
+    "name": "Liquid Nitrogen Dewar",
+    "category": "Cryo",
+    "cost": 10,
+    "description": "Ultra-cold cryogenic fluid (100% LN₂ at 77 K). Instantly flash-freezes water to solid ice.",
+    "unlocked_by_default": false,
+    "composition": [
+      {
+        "compound": "ln2",
+        "percentage": 100
+      }
+    ],
+    "primary_compound": "ln2",
+    "icon": "Snowflake"
+  },
+  {
+    "id": "item_sulfur",
+    "name": "Brimstone Sulfur Powder",
+    "category": "Pyrotechnics",
+    "cost": 5,
+    "description": "Bright yellow elemental sulfur (100% S). Burns with a blue flame producing pungent sulfur dioxide.",
+    "unlocked_by_default": false,
+    "composition": [
+      {
+        "compound": "s",
+        "percentage": 100
+      }
+    ],
+    "primary_compound": "s",
+    "icon": "Flame"
+  },
+  {
+    "id": "item_potassium_nitrate",
+    "name": "Saltpeter (KNO₃)",
+    "category": "Pyrotechnics",
+    "cost": 10,
+    "description": "Pure potassium nitrate (100% KNO₃). Powerful oxidizer for energetic pyrotechnic mixtures.",
+    "unlocked_by_default": false,
+    "composition": [
+      {
+        "compound": "kno3",
+        "percentage": 100
+      }
+    ],
+    "primary_compound": "kno3",
+    "icon": "Sparkles"
+  },
+  {
+    "id": "item_aluminium_powder",
+    "name": "Aluminium Metal Powder",
+    "category": "Metals",
+    "cost": 10,
+    "description": "Fine atomized aluminium (100% Al). Combines with rust in the famous super-hot thermite reaction.",
+    "unlocked_by_default": false,
+    "composition": [
+      {
+        "compound": "al",
+        "percentage": 100
+      }
+    ],
+    "primary_compound": "al",
+    "icon": "Shield"
+  },
+  {
+    "id": "item_copper_metal",
+    "name": "Pure Copper Powder",
+    "category": "Metals",
+    "cost": 10,
+    "description": "Elemental copper filings (100% Cu). Excellent thermal conductor that oxidizes under flame heat.",
+    "unlocked_by_default": false,
+    "composition": [
+      {
+        "compound": "cu",
+        "percentage": 100
+      }
+    ],
+    "primary_compound": "cu",
+    "icon": "Coins"
+  },
+  {
+    "id": "item_hydrogen_peroxide",
+    "name": "Concentrated Peroxide (30%)",
+    "category": "Advanced",
+    "cost": 10,
+    "description": "High-strength hydrogen peroxide (100% H₂O₂). Decomposes violently into expanding foam with catalysts.",
+    "unlocked_by_default": false,
+    "composition": [
+      {
+        "compound": "h2o2",
+        "percentage": 100
+      }
+    ],
+    "primary_compound": "h2o2",
+    "icon": "FlaskConical"
+  },
+  {
+    "id": "item_manganese_dioxide",
+    "name": "Manganese Dioxide Catalyst",
+    "category": "Advanced",
+    "cost": 10,
+    "description": "Black catalytic mineral powder (100% MnO₂). Triggers the famous Elephant Toothpaste eruption.",
+    "unlocked_by_default": false,
+    "composition": [
+      {
+        "compound": "mno2",
+        "percentage": 100
+      }
+    ],
+    "primary_compound": "mno2",
+    "icon": "Atom"
+  },
+  {
+    "id": "item_glycerin",
+    "name": "Pure Glycerin Syrupy Fluid",
+    "category": "Fluids",
+    "cost": 10,
+    "description": "Dense viscous glycerol (100% C₃H₈O₃). Sinks in water and ignites hypergolically with permanganate.",
+    "unlocked_by_default": false,
+    "composition": [
+      {
+        "compound": "c3h8o3",
+        "percentage": 100
+      }
+    ],
+    "primary_compound": "c3h8o3",
+    "icon": "Droplets"
+  },
+  {
+    "id": "item_potassium_permanganate",
+    "name": "Potassium Permanganate",
+    "category": "Advanced",
+    "cost": 10,
+    "description": "Intense purple crystals (100% KMnO₄). Potent oxidizer causing delayed spontaneous fires.",
+    "unlocked_by_default": false,
+    "composition": [
+      {
+        "compound": "kmno4",
+        "percentage": 100
+      }
+    ],
+    "primary_compound": "kmno4",
+    "icon": "Sparkles"
+  },
+  {
+    "id": "item_sulfuric_acid",
+    "name": "Concentrated Sulfuric Acid",
+    "category": "Advanced",
+    "cost": 15,
+    "description": "Extremely dense mineral acid (100% H₂SO₄). Dehydrates carbohydrates into erupting carbon snakes.",
+    "unlocked_by_default": false,
+    "composition": [
+      {
+        "compound": "h2so4",
+        "percentage": 100
+      }
+    ],
+    "primary_compound": "h2so4",
+    "icon": "AlertTriangle"
+  },
+  {
+    "id": "item_volcanic_lava",
+    "name": "Volcanic Magma / Lava",
+    "category": "Advanced",
+    "cost": 15,
+    "description": "Superheated incandescent 1400 K liquid magma (100% Lava). Boils water violently into steam.",
+    "unlocked_by_default": false,
+    "composition": [
+      {
+        "compound": "lava",
+        "percentage": 100
+      }
+    ],
+    "primary_compound": "lava",
+    "icon": "Flame"
+  },
+  {
+    "id": "item_potassium_metal",
+    "name": "Metallic Potassium",
+    "category": "Metals",
+    "cost": 20,
+    "description": "Pure alkali metal (100% K). Explodes even more violently than sodium when touching water.",
+    "unlocked_by_default": false,
+    "composition": [
+      {
+        "compound": "k",
+        "percentage": 100
+      }
+    ],
+    "primary_compound": "k",
+    "icon": "Zap"
   }
 ]
