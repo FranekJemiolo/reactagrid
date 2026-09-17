@@ -9,6 +9,8 @@ let loopId: number | null = null;
 let lastTime = performance.now();
 let frameCount = 0;
 let currentFps = 60;
+let speedMultiplier = 1;
+let subTickAccumulator = 0;
 
 function tick() {
   if (!engine) return;
@@ -21,7 +23,20 @@ function tick() {
     lastTime = now;
   }
 
-  engine.step();
+  if (speedMultiplier <= 0.5) {
+    subTickAccumulator += speedMultiplier;
+    if (subTickAccumulator >= 1) {
+      engine.step();
+      subTickAccumulator -= 1;
+    } else {
+      engine.renderColorBuffer();
+    }
+  } else {
+    const steps = Math.min(4, Math.round(speedMultiplier));
+    for (let s = 0; s < steps; s++) {
+      engine.step();
+    }
+  }
 
   // Dispatch queued reactions
   while (engine.queuedEvents.length > 0) {
@@ -136,6 +151,11 @@ self.addEventListener('message', (e: MessageEvent<MainToWorkerMessage>) => {
       if (engine) {
         engine.gravityMode = msg.payload.gravity;
       }
+      break;
+    }
+
+    case 'SET_SPEED': {
+      speedMultiplier = msg.payload.multiplier;
       break;
     }
 

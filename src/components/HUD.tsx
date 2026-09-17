@@ -9,6 +9,9 @@ import {
   DollarSign,
   Activity,
   Thermometer,
+  Camera,
+  HelpCircle,
+  FastForward,
 } from 'lucide-react';
 
 interface HUDProps {
@@ -31,6 +34,10 @@ interface HUDProps {
   onToggleProbe: () => void;
   isMuted: boolean;
   onToggleMute: () => void;
+  speedMultiplier: number;
+  onCycleSpeed: () => void;
+  onExportSnapshot: () => void;
+  onOpenShortcuts: () => void;
   discoveredCount: number;
   totalCompoundsCount: number;
 }
@@ -55,6 +62,10 @@ export const HUD: React.FC<HUDProps> = ({
   onToggleProbe,
   isMuted,
   onToggleMute,
+  speedMultiplier,
+  onCycleSpeed,
+  onExportSnapshot,
+  onOpenShortcuts,
   discoveredCount,
   totalCompoundsCount,
 }) => {
@@ -155,6 +166,17 @@ export const HUD: React.FC<HUDProps> = ({
           <span>{gravity === 1 ? '1G ⬇' : gravity === 0 ? '0G 🪐' : '-1G ⬆'}</span>
         </button>
 
+        {/* Speed Controls */}
+        <button
+          onClick={onCycleSpeed}
+          id="cycle-speed-button"
+          className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-900/80 border border-slate-700/60 text-indigo-300 hover:text-white transition-all shadow-md"
+          title="Cycle Simulation Speed: 0.5x, 1x, 2x, 4x"
+        >
+          <FastForward className="w-3.5 h-3.5 text-indigo-400" />
+          <span>{speedMultiplier}x</span>
+        </button>
+
         {/* Pixel Probe Inspector Toggle */}
         <button
           onClick={onToggleProbe}
@@ -187,6 +209,16 @@ export const HUD: React.FC<HUDProps> = ({
           </span>
         </button>
 
+        {/* Canvas PNG Snapshot Export */}
+        <button
+          onClick={onExportSnapshot}
+          id="export-snapshot-button"
+          className="p-1.5 rounded-xl bg-slate-900/80 border border-slate-700/60 text-slate-300 hover:text-white transition-colors"
+          title="Export Lab Tank PNG Snapshot"
+        >
+          <Camera className="w-4 h-4 text-sky-400" />
+        </button>
+
         {/* Audio Mute/Unmute Toggle */}
         <button
           onClick={onToggleMute}
@@ -195,6 +227,16 @@ export const HUD: React.FC<HUDProps> = ({
           title={isMuted ? 'Unmute Procedural Audio' : 'Mute Audio'}
         >
           {isMuted ? '🔇' : '🔊'}
+        </button>
+
+        {/* Keyboard Shortcuts Guide */}
+        <button
+          onClick={onOpenShortcuts}
+          id="open-shortcuts-button"
+          className="p-1.5 rounded-xl bg-slate-900/80 border border-slate-700/60 text-slate-300 hover:text-white transition-colors"
+          title="Keyboard Shortcuts Guide (?)"
+        >
+          <HelpCircle className="w-4 h-4 text-indigo-400" />
         </button>
 
         {/* Simulation Controls */}

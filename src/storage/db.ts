@@ -36,9 +36,9 @@ export function getDatabase(): Promise<IDBPDatabase<ReactaGridDB>> {
 export const INITIAL_PROGRESS: UserProgress = {
   funds: 50, // Day 1 starter funds ($50)
   totalEarned: 50,
-  unlockedStoreItems: ['item_tap_water', 'item_play_sand'],
+  unlockedStoreItems: ['item_tap_water', 'item_play_sand', 'item_lab_glass'],
   discoveredReactions: [],
-  discoveredCompounds: ['h2o', 'sio2'],
+  discoveredCompounds: ['h2o', 'sio2', 'glass'],
   totalReactionsTriggered: 0,
   energyGeneratedKj: 0,
 };

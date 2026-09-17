@@ -102,6 +102,22 @@ MOLECULES_DATA: Dict[str, Dict[str, Any]] = {
         "hazard_description": "Inert granular mineral.",
         "description": "Silicon dioxide granular mineral forming natural sedimentary banks."
     },
+    "glass": {
+        "id": "glass",
+        "name": "Borosilicate Glass (Pyrex)",
+        "formula": "SiO₂·B₂O₃",
+        "state": "solid",
+        "density": 2.230,
+        "color": "#94a3b8b0",
+        "melting_point_k": 1533.15,
+        "boiling_point_k": 2500.0,
+        "specific_heat": 0.830,
+        "thermal_conductivity": 1.14,
+        "flammable": False,
+        "hazard_rating": 0,
+        "hazard_description": "Inert laboratory glassware.",
+        "description": "Durable borosilicate glass (Pyrex). Immovable structural solid used for beakers, flasks, and containment walls."
+    },
     "nahco3": {
         "id": "nahco3",
         "name": "Sodium Bicarbonate (Baking Soda)",
@@ -813,6 +829,19 @@ STORE_ITEMS_DATA: List[Dict[str, Any]] = [
         ],
         "primary_compound": "sio2",
         "icon": "Layers"
+    },
+    {
+        "id": "item_lab_glass",
+        "name": "Lab Glassware (Pyrex)",
+        "category": "Basics",
+        "cost": 0,
+        "description": "Borosilicate glass containment barriers and beakers (100% Pyrex). Immovable solid under gravity.",
+        "unlocked_by_default": True,
+        "composition": [
+            {"compound": "glass", "percentage": 100}
+        ],
+        "primary_compound": "glass",
+        "icon": "Box"
     },
     {
         "id": "item_baking_soda",

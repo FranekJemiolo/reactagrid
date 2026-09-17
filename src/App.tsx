@@ -7,6 +7,7 @@ import { JournalModal } from './components/JournalModal';
 import { DiscoveryNotification, DiscoveryToast } from './components/DiscoveryNotification';
 import { SimulationWorkerBridge } from './engine/workerBridge';
 import { SnapshotsModal } from './components/SnapshotsModal';
+import { ShortcutsModal } from './components/ShortcutsModal';
 import { CellProbe, CellProbeData } from './components/CellProbe';
 import { sounds } from './audio/sound';
 import { ChemicalDatabase, StoreItem } from './types/chemistry';
@@ -47,6 +48,8 @@ export const App: React.FC = () => {
   const [isStoreOpen, setIsStoreOpen] = useState<boolean>(false);
   const [isJournalOpen, setIsJournalOpen] = useState<boolean>(false);
   const [isSnapshotsOpen, setIsSnapshotsOpen] = useState<boolean>(false);
+  const [isShortcutsOpen, setIsShortcutsOpen] = useState<boolean>(false);
+  const [speedMultiplier, setSpeedMultiplier] = useState<number>(1);
   const [toasts, setToasts] = useState<DiscoveryToast[]>([]);
 
   // Simulation references
@@ -119,6 +122,41 @@ export const App: React.FC = () => {
   const handleToggleMute = () => {
     const muted = sounds.toggleMute();
     setIsMuted(muted);
+  };
+
+  const handleCycleSpeed = () => {
+    const speeds = [0.5, 1, 2, 4];
+    const currentIndex = speeds.indexOf(speedMultiplier);
+    const nextSpeed = speeds[(currentIndex + 1) % speeds.length];
+    setSpeedMultiplier(nextSpeed);
+    bridgeRef.current?.setSpeed(nextSpeed);
+    addToast({
+      title: 'Simulation Speed',
+      message: `Running at ${nextSpeed}x speed`,
+    });
+  };
+
+  const handleExportSnapshot = () => {
+    const canvas = document.querySelector('canvas');
+    if (!canvas) return;
+
+    try {
+      const dataUrl = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+      link.download = `reactagrid-snapshot-${timestamp}.png`;
+      link.href = dataUrl;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      addToast({
+        title: 'Snapshot Exported',
+        message: 'Saved high-resolution PNG of the laboratory tank.',
+      });
+    } catch (err) {
+      console.error('Failed to export canvas snapshot:', err);
+    }
   };
 
   const handleLoadPreset = (presetId: string) => {
@@ -419,6 +457,124 @@ export const App: React.FC = () => {
     (item) => progress?.unlockedStoreItems.includes(item.id) || item.unlocked_by_default,
   );
 
+  // Global Keyboard Shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement ||
+        e.target instanceof HTMLSelectElement
+      ) {
+        return;
+      }
+
+      if (e.key === 'Escape') {
+        setIsStoreOpen(false);
+        setIsJournalOpen(false);
+        setIsSnapshotsOpen(false);
+        setIsShortcutsOpen(false);
+        return;
+      }
+
+      if (e.key === '?' || (e.shiftKey && e.key === '/')) {
+        e.preventDefault();
+        setIsShortcutsOpen((prev) => !prev);
+        return;
+      }
+
+      if (e.code === 'Space') {
+        e.preventDefault();
+        setIsRunning((prev) => {
+          if (prev) {
+            bridgeRef.current?.pause();
+            return false;
+          } else {
+            bridgeRef.current?.start();
+            return true;
+          }
+        });
+        return;
+      }
+
+      if (e.key === '.' || e.key === 's' || e.key === 'S') {
+        e.preventDefault();
+        bridgeRef.current?.step();
+        return;
+      }
+
+      if (e.key === 'c' || e.key === 'C') {
+        e.preventDefault();
+        bridgeRef.current?.clear();
+        return;
+      }
+
+      if (e.key === 't' || e.key === 'T') {
+        e.preventDefault();
+        setRenderMode((prev) => {
+          const next = prev === 'natural' ? 'thermal' : 'natural';
+          bridgeRef.current?.setRenderMode(next);
+          return next;
+        });
+        return;
+      }
+
+      if (e.key === 'g' || e.key === 'G') {
+        e.preventDefault();
+        setGravity((prev) => {
+          const next: 1 | 0 | -1 = prev === 1 ? 0 : prev === 0 ? -1 : 1;
+          bridgeRef.current?.setGravity(next);
+          return next;
+        });
+        return;
+      }
+
+      if (e.key === 'p' || e.key === 'P') {
+        e.preventDefault();
+        setIsProbeActive((prev) => {
+          if (prev) setProbeData(null);
+          return !prev;
+        });
+        return;
+      }
+
+      if (e.key === 'm' || e.key === 'M') {
+        e.preventDefault();
+        const muted = sounds.toggleMute();
+        setIsMuted(muted);
+        return;
+      }
+
+      if (e.key === 'e' || e.key === 'E') {
+        e.preventDefault();
+        setSelectedItemId('empty');
+        return;
+      }
+
+      if (e.key === '[') {
+        e.preventDefault();
+        setBrushRadius((prev) => Math.max(1, prev - 2));
+        return;
+      }
+
+      if (e.key === ']') {
+        e.preventDefault();
+        setBrushRadius((prev) => Math.min(14, prev + 2));
+        return;
+      }
+
+      const radiuses = [1, 3, 5, 8, 14];
+      const digit = parseInt(e.key, 10);
+      if (digit >= 1 && digit <= 5) {
+        e.preventDefault();
+        setBrushRadius(radiuses[digit - 1]);
+        return;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-slate-950 font-sans select-none">
       {/* Heads-Up Display */}
@@ -442,6 +598,10 @@ export const App: React.FC = () => {
         onToggleProbe={handleToggleProbe}
         isMuted={isMuted}
         onToggleMute={handleToggleMute}
+        speedMultiplier={speedMultiplier}
+        onCycleSpeed={handleCycleSpeed}
+        onExportSnapshot={handleExportSnapshot}
+        onOpenShortcuts={() => setIsShortcutsOpen(true)}
         discoveredCount={progress?.discoveredCompounds.length ?? 0}
         totalCompoundsCount={Object.keys(chemicalDatabase.molecules).length - 1}
       />
@@ -498,6 +658,9 @@ export const App: React.FC = () => {
         onRequestSaveSnapshot={handleRequestSaveSnapshot}
         onLoadSnapshotState={handleLoadSnapshotState}
       />
+
+      {/* Keyboard Shortcuts Cheatsheet Modal */}
+      <ShortcutsModal isOpen={isShortcutsOpen} onClose={() => setIsShortcutsOpen(false)} />
 
       {/* Discovery Notification Banners */}
       <DiscoveryNotification toasts={toasts} onDismiss={dismissToast} />

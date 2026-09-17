@@ -119,6 +119,10 @@ export class SimulationWorkerBridge {
     this.send({ type: 'SET_GRAVITY', payload: { gravity } });
   }
 
+  public setSpeed(multiplier: number): void {
+    this.send({ type: 'SET_SPEED', payload: { multiplier } });
+  }
+
   public queryCell(x: number, y: number): void {
     this.send({ type: 'QUERY_CELL', payload: { x, y } });
   }

@@ -140,4 +140,40 @@ test.describe('ReactaGrid - Complete E2E Gameplay & Simulation Flow', () => {
       expect(hudText).toMatch(/\d+ particles/);
     }
   });
+
+  test('supports speed cycling, keyboard shortcuts modal, and starter lab glassware', async ({
+    page,
+  }) => {
+    // Verify starter Pyrex Lab Glassware is present in the palette
+    const glassTool = page.locator('#item-tool-item_lab_glass');
+    await expect(glassTool).toBeVisible();
+    await expect(glassTool).toContainText('Lab Glassware');
+
+    // Cycle simulation speed
+    const speedBtn = page.locator('#cycle-speed-button');
+    await expect(speedBtn).toBeVisible();
+    await expect(speedBtn).toContainText('1x');
+    await speedBtn.click();
+    await expect(speedBtn).toContainText('2x');
+    await speedBtn.click();
+    await expect(speedBtn).toContainText('4x');
+    await speedBtn.click();
+    await expect(speedBtn).toContainText('0.5x');
+    await speedBtn.click();
+    await expect(speedBtn).toContainText('1x');
+
+    // Open Keyboard Shortcuts guide modal
+    await page.click('#open-shortcuts-button');
+    const shortcutsModal = page.locator('#shortcuts-modal');
+    await expect(shortcutsModal).toBeVisible();
+    await expect(shortcutsModal).toContainText('Keyboard Shortcuts');
+
+    // Close via close button
+    await page.click('#close-shortcuts-modal');
+    await expect(shortcutsModal).not.toBeVisible();
+
+    // Verify snapshot export button exists and is clickable
+    const snapshotBtn = page.locator('#export-snapshot-button');
+    await expect(snapshotBtn).toBeVisible();
+  });
 });

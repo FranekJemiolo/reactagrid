@@ -32,6 +32,7 @@ export class SimulationEngine {
   public conductivityLookup: Float32Array;
   public boilingPointLookup: Float32Array;
   public meltingPointLookup: Float32Array;
+  public isStaticLookup: Uint8Array; // 1 = static solid (glassware/barrier), 0 = dynamic
 
   // Reactions lookup
   public pairReactions: Map<number, Reaction[]> = new Map();
@@ -69,6 +70,7 @@ export class SimulationEngine {
     this.conductivityLookup = new Float32Array(this.speciesCount);
     this.boilingPointLookup = new Float32Array(this.speciesCount);
     this.meltingPointLookup = new Float32Array(this.speciesCount);
+    this.isStaticLookup = new Uint8Array(this.speciesCount);
 
     this.initDatabase(database);
   }
@@ -99,6 +101,7 @@ export class SimulationEngine {
     this.conductivityLookup[0] = 0.026;
     this.boilingPointLookup[0] = 0;
     this.meltingPointLookup[0] = 0;
+    this.isStaticLookup[0] = 0;
 
     let index = 1;
     for (const mol of Object.values(database.molecules)) {
@@ -115,6 +118,7 @@ export class SimulationEngine {
       this.conductivityLookup[index] = mol.thermal_conductivity;
       this.boilingPointLookup[index] = mol.boiling_point_k;
       this.meltingPointLookup[index] = mol.melting_point_k;
+      this.isStaticLookup[index] = mol.id === 'glass' ? 1 : 0;
 
       index++;
     }
@@ -273,7 +277,7 @@ export class SimulationEngine {
         for (let x = 0; x < w; x++) {
           const idx = y * w + x;
           const type = types[idx];
-          if (type === 0 || flags[idx] === tick) continue;
+          if (type === 0 || flags[idx] === tick || this.isStaticLookup[type] === 1) continue;
 
           // Slow Brownian float / surface tension cohesion
           if (Math.random() < 0.2) {
@@ -318,7 +322,12 @@ export class SimulationEngine {
         const riseY = y - gDir;
 
         if (state === 2) {
-          // SOLID (Sand, Iron, Baking Soda, etc.)
+          // Static Solid (Pyrex glassware / barrier walls) stays fixed in place
+          if (this.isStaticLookup[type] === 1) {
+            continue;
+          }
+
+          // Dynamic SOLID (Sand, Iron, Baking Soda, etc.)
           if (fallY >= 0 && fallY < h) {
             const belowIdx = fallY * w + x;
             const belowType = types[belowIdx];

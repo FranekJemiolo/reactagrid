@@ -18,6 +18,7 @@ export type MainToWorkerMessage =
   | { type: 'PAINT'; payload: PaintCommand }
   | { type: 'SET_RENDER_MODE'; payload: { mode: 'natural' | 'thermal' } }
   | { type: 'SET_GRAVITY'; payload: { gravity: 1 | 0 | -1 } }
+  | { type: 'SET_SPEED'; payload: { multiplier: number } }
   | { type: 'QUERY_CELL'; payload: { x: number; y: number } }
   | { type: 'LOAD_STATE'; payload: { types: Uint16Array; temps: Float32Array } }
   | { type: 'REQUEST_STATE' };

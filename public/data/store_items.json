@@ -32,6 +32,22 @@
     "icon": "Layers"
   },
   {
+    "id": "item_lab_glass",
+    "name": "Lab Glassware (Pyrex)",
+    "category": "Basics",
+    "cost": 0,
+    "description": "Borosilicate glass containment barriers and beakers (100% Pyrex). Immovable solid under gravity.",
+    "unlocked_by_default": true,
+    "composition": [
+      {
+        "compound": "glass",
+        "percentage": 100
+      }
+    ],
+    "primary_compound": "glass",
+    "icon": "Box"
+  },
+  {
     "id": "item_baking_soda",
     "name": "Baking Soda",
     "category": "Household",

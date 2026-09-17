@@ -79,6 +79,22 @@
     "hazard_description": "Inert granular mineral.",
     "description": "Silicon dioxide granular mineral forming natural sedimentary banks."
   },
+  "glass": {
+    "id": "glass",
+    "name": "Borosilicate Glass (Pyrex)",
+    "formula": "SiO₂·B₂O₃",
+    "state": "solid",
+    "density": 2.23,
+    "color": "#94a3b8b0",
+    "melting_point_k": 1533.15,
+    "boiling_point_k": 2500.0,
+    "specific_heat": 0.83,
+    "thermal_conductivity": 1.14,
+    "flammable": false,
+    "hazard_rating": 0,
+    "hazard_description": "Inert laboratory glassware.",
+    "description": "Durable borosilicate glass (Pyrex). Immovable structural solid used for beakers, flasks, and containment walls."
+  },
   "nahco3": {
     "id": "nahco3",
     "name": "Sodium Bicarbonate (Baking Soda)",

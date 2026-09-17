@@ -39,6 +39,28 @@ describe('SimulationEngine - Core Physics and Chemistry Passes', () => {
     expect(engine.typeGrid[5 * 20 + 5]).toBe(0);
   });
 
+  it('keeps static borosilicate glassware anchored while supporting fluids and solids', () => {
+    const glassId = engine.getSpeciesId('glass');
+    const waterId = engine.getSpeciesId('h2o');
+
+    // Build a glass beaker (U-shape) floating at y=10
+    engine.setCell(4, 9, 'glass');
+    engine.setCell(4, 10, 'glass');
+    engine.setCell(5, 10, 'glass');
+    engine.setCell(6, 10, 'glass');
+    engine.setCell(6, 9, 'glass');
+
+    // Pour water inside the beaker at (5, 9)
+    engine.setCell(5, 9, 'h2o');
+
+    engine.step();
+
+    // Glass remains anchored and holds water inside beaker
+    expect(engine.typeGrid[10 * 20 + 5]).toBe(glassId);
+    expect(engine.typeGrid[9 * 20 + 5]).toBe(waterId);
+    expect(engine.typeGrid[11 * 20 + 5]).toBe(0); // empty beneath beaker
+  });
+
   it('handles density sorting: denser liquid sinks below lighter liquid in a test column', () => {
     const waterId = engine.getSpeciesId('h2o'); // density 1.00
     const alcoholId = engine.getSpeciesId('c2h5oh'); // density 0.789 (lighter)
