@@ -1,0 +1,4 @@
+{
+  "manual_overrides": {},
+  "description": "Manual overrides for thermodynamic properties when empirical API data is unavailable. Do not use for game balancing."
+}

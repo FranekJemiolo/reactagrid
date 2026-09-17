@@ -1096,6 +1096,45 @@ STORE_ITEMS_DATA: List[Dict[str, Any]] = [
         ],
         "primary_compound": "stirrer",
         "icon": "Activity"
+    },
+    {
+        "id": "item_ice_block",
+        "name": "Solid Ice Block",
+        "category": "Basics",
+        "cost": 5,
+        "description": "Solid crystalline water (100% H₂O Ice). Melts into liquid water when heated above 273.15 K.",
+        "unlocked_by_default": True,
+        "composition": [
+            {"compound": "h2o_ice", "percentage": 100}
+        ],
+        "primary_compound": "h2o_ice",
+        "icon": "Box"
+    },
+    {
+        "id": "item_ammonia",
+        "name": "Ammonia Gas",
+        "category": "Cleaning",
+        "cost": 25,
+        "description": "Compressed ammonia gas (100% NH₃). Volatile alkaline compound that expands rapidly.",
+        "unlocked_by_default": False,
+        "composition": [
+            {"compound": "nh3", "percentage": 100}
+        ],
+        "primary_compound": "nh3",
+        "icon": "SprayCan"
+    },
+    {
+        "id": "item_oxygen_gas",
+        "name": "Compressed Oxygen",
+        "category": "Advanced",
+        "cost": 30,
+        "description": "High-purity compressed gaseous oxygen (100% O₂). Strong oxidizer that accelerates exothermic reactions.",
+        "unlocked_by_default": False,
+        "composition": [
+            {"compound": "o2", "percentage": 100}
+        ],
+        "primary_compound": "o2",
+        "icon": "Wind"
     }
 ]
 

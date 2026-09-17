@@ -1,0 +1,70 @@
+items:
+  - item_id: 'item_tap_water'
+    name: 'Tap Water'
+    category: 'Household'
+    cost: 0
+    composition:
+      h2o: 1.0
+  - item_id: 'item_ice_block'
+    name: 'Solid Ice Block'
+    category: 'Household'
+    cost: 5
+    composition:
+      h2o_ice: 1.0
+  - item_id: 'item_baking_soda'
+    name: 'Pure Baking Soda'
+    category: 'Household'
+    cost: 10
+    composition:
+      nahco3: 1.0
+  - item_id: 'item_distilled_vinegar'
+    name: 'Distilled White Vinegar'
+    category: 'Household'
+    cost: 15
+    composition:
+      ch3cooh: 0.08
+      h2o: 0.92
+  - item_id: 'item_household_bleach'
+    name: 'Household Bleach'
+    category: 'Cleaning'
+    cost: 25
+    composition:
+      naclo: 0.06
+      h2o: 0.94
+  - item_id: 'item_ammonia'
+    name: 'Pure Ammonia'
+    category: 'Cleaning'
+    cost: 30
+    composition:
+      nh3: 1.0
+  - item_id: 'item_window_cleaner'
+    name: 'Glass Cleaner'
+    category: 'Cleaning'
+    cost: 20
+    composition:
+      nh3: 0.05
+      h2o: 0.95
+  - item_id: 'item_iron_filings'
+    name: 'Pure Iron Filings'
+    category: 'Elements'
+    cost: 40
+    composition:
+      fe: 1.0
+  - item_id: 'item_metallic_sodium'
+    name: 'Pure Metallic Sodium'
+    category: 'Elements'
+    cost: 100
+    composition:
+      na: 1.0
+  - item_id: 'item_silica_sand'
+    name: 'Silica Sand'
+    category: 'Lab Supplies'
+    cost: 5
+    composition:
+      sio2: 1.0
+  - item_id: 'item_potassium_block'
+    name: 'Pure Potassium'
+    category: 'Elements'
+    cost: 150
+    composition:
+      k: 1.0

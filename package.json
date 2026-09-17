@@ -23,7 +23,8 @@
     "stress-test": "npx tsx scripts/stress_test.ts",
     "pipeline": "python3 data-pipeline/extract_chemistry.py",
     "pipeline:etl": "python3 data-pipeline/etl_ingestion.py",
-    "pipeline:validate": "python3 data-pipeline/validate_schema.py"
+    "pipeline:validate": "python3 data-pipeline/validate_schema.py",
+    "pipeline:build": "python3 data-pipeline/build_ledgers.py"
   },
   "dependencies": {
     "idb": "^8.0.2",
