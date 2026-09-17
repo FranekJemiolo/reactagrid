@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Molecule } from '../types/chemistry';
-import { X, BookOpen, AlertTriangle, Lock, ShieldAlert } from 'lucide-react';
+import { X, BookOpen, AlertTriangle, Lock, ShieldAlert, Search } from 'lucide-react';
 
 interface JournalModalProps {
   isOpen: boolean;
@@ -16,15 +16,31 @@ export const JournalModal: React.FC<JournalModalProps> = ({
   discoveredCompoundIds,
 }) => {
   const [selectedMoleculeId, setSelectedMoleculeId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [activeFilter, setActiveFilter] = useState<'all' | 'discovered' | 'hazards'>('all');
 
   if (!isOpen) return null;
 
   const moleculeList = Object.values(molecules).filter((m) => m.id !== 'empty');
+  const isDiscovered = (id: string) => discoveredCompoundIds.includes(id);
+
+  const filteredMolecules = moleculeList.filter((m) => {
+    const discovered = isDiscovered(m.id);
+    if (activeFilter === 'discovered' && !discovered) return false;
+    if (activeFilter === 'hazards' && (!discovered || m.hazard_rating === 0)) return false;
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      const matchName = discovered && m.name.toLowerCase().includes(q);
+      const matchFormula = discovered && m.formula.toLowerCase().includes(q);
+      const matchId = m.id.toLowerCase().includes(q);
+      return matchName || matchFormula || matchId;
+    }
+    return true;
+  });
+
   const activeMolecule = selectedMoleculeId
     ? molecules[selectedMoleculeId]
-    : moleculeList.find((m) => discoveredCompoundIds.includes(m.id)) || moleculeList[0];
-
-  const isDiscovered = (id: string) => discoveredCompoundIds.includes(id);
+    : filteredMolecules.find((m) => isDiscovered(m.id)) || filteredMolecules[0] || moleculeList[0];
 
   const getHazardBadge = (rating: number) => {
     switch (rating) {
@@ -91,49 +107,98 @@ export const JournalModal: React.FC<JournalModalProps> = ({
         {/* Content Body: Split View (List on left, Detail on right) */}
         <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
           {/* Compound Entries List */}
-          <div className="w-full md:w-5/12 border-b md:border-b-0 md:border-r border-slate-800/80 p-3 overflow-y-auto max-h-60 md:max-h-full space-y-1.5">
-            {moleculeList.map((mol) => {
-              const discovered = isDiscovered(mol.id);
-              const isSelected = activeMolecule?.id === mol.id;
+          <div className="w-full md:w-5/12 border-b md:border-b-0 md:border-r border-slate-800/80 p-3 flex flex-col gap-2 max-h-72 md:max-h-full">
+            {/* Search Input */}
+            <div className="relative">
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search chemical name or formula..."
+                className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-slate-950/60 border border-slate-700/60 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-500"
+              />
+            </div>
 
-              return (
-                <button
-                  key={mol.id}
-                  onClick={() => setSelectedMoleculeId(mol.id)}
-                  id={`journal-item-${mol.id}`}
-                  className={`w-full flex items-center justify-between p-2.5 rounded-xl border transition-all text-left ${
-                    isSelected
-                      ? 'bg-sky-950/60 border-sky-500/60 text-white'
-                      : 'bg-slate-800/40 border-slate-800 text-slate-300 hover:bg-slate-800'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    {discovered ? (
-                      <div
-                        className="w-3.5 h-3.5 rounded-full ring-1 ring-white/20"
-                        style={{ backgroundColor: mol.color.substring(0, 7) }}
-                      />
-                    ) : (
-                      <Lock className="w-3.5 h-3.5 text-slate-600" />
-                    )}
-                    <div>
-                      <div className="text-xs font-semibold">
-                        {discovered ? mol.name : 'Unknown Compound'}
-                      </div>
-                      <div className="text-[10px] text-slate-500 font-mono">
-                        {discovered ? mol.formula : '???'}
+            {/* Filter Tabs */}
+            <div className="flex items-center gap-1 text-[11px]">
+              <button
+                onClick={() => setActiveFilter('all')}
+                className={`flex-1 py-1 rounded-lg font-medium transition-colors ${
+                  activeFilter === 'all'
+                    ? 'bg-sky-600 text-white shadow-sm'
+                    : 'bg-slate-800/60 text-slate-400 hover:text-white'
+                }`}
+              >
+                All ({moleculeList.length})
+              </button>
+              <button
+                onClick={() => setActiveFilter('discovered')}
+                className={`flex-1 py-1 rounded-lg font-medium transition-colors ${
+                  activeFilter === 'discovered'
+                    ? 'bg-emerald-600 text-white shadow-sm'
+                    : 'bg-slate-800/60 text-slate-400 hover:text-white'
+                }`}
+              >
+                Unlocked ({discoveredCompoundIds.length})
+              </button>
+              <button
+                onClick={() => setActiveFilter('hazards')}
+                className={`flex-1 py-1 rounded-lg font-medium transition-colors ${
+                  activeFilter === 'hazards'
+                    ? 'bg-rose-600 text-white shadow-sm'
+                    : 'bg-slate-800/60 text-slate-400 hover:text-white'
+                }`}
+              >
+                Hazards ⚠️
+              </button>
+            </div>
+
+            {/* Compound Item List */}
+            <div className="flex-1 overflow-y-auto space-y-1.5 pr-0.5 scrollbar-thin scrollbar-thumb-slate-800">
+              {filteredMolecules.map((mol) => {
+                const discovered = isDiscovered(mol.id);
+                const isSelected = activeMolecule?.id === mol.id;
+
+                return (
+                  <button
+                    key={mol.id}
+                    onClick={() => setSelectedMoleculeId(mol.id)}
+                    id={`journal-item-${mol.id}`}
+                    className={`w-full flex items-center justify-between p-2.5 rounded-xl border transition-all text-left ${
+                      isSelected
+                        ? 'bg-sky-950/60 border-sky-500/60 text-white'
+                        : 'bg-slate-800/40 border-slate-800 text-slate-300 hover:bg-slate-800'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      {discovered ? (
+                        <div
+                          className="w-3.5 h-3.5 rounded-full ring-1 ring-white/20"
+                          style={{ backgroundColor: mol.color.substring(0, 7) }}
+                        />
+                      ) : (
+                        <Lock className="w-3.5 h-3.5 text-slate-600" />
+                      )}
+                      <div>
+                        <div className="text-xs font-semibold">
+                          {discovered ? mol.name : 'Unknown Compound'}
+                        </div>
+                        <div className="text-[10px] text-slate-500 font-mono">
+                          {discovered ? mol.formula : '???'}
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {discovered && (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 font-mono">
-                      {mol.state}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
+                    {discovered && (
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 font-mono">
+                        {mol.state}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {/* Detailed Compound Inspector */}

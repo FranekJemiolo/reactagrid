@@ -290,7 +290,9 @@ export const App: React.FC = () => {
           }
 
           const isNew = !current.discoveredReactions.includes(rxn.reactionId);
-          const reward = isNew ? rxn.reward : 1; // Base micro-grant for running reactions
+          // Milestone 7: Award funds for discovery + energy micro-grants for sustaining exothermic reactions
+          const energyBonus = Math.floor(Math.abs(rxn.heatYield) / 100);
+          const reward = isNew ? rxn.reward : Math.max(1, energyBonus);
 
           const updated: UserProgress = {
             ...current,
