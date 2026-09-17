@@ -1,0 +1,202 @@
+[
+  {
+    "id": "level_1_phase_shift",
+    "title": "Phase Shift (Tutorial)",
+    "category": "Thermodynamics",
+    "description": "Harness thermal energy with the Bunsen Burner to melt solid ice into fluid water without leaving any unmelted ice crystals.",
+    "availableStoreItems": ["item_ice_block", "item_bunsen_burner"],
+    "initialFunds": 50,
+    "initialGrid": [
+      {
+        "x": 90,
+        "y": 140,
+        "width": 20,
+        "height": 6,
+        "compound": "h2o_ice",
+        "tempK": 250.0
+      }
+    ],
+    "winCondition": {
+      "type": "compound_bounds",
+      "conditions": [
+        {
+          "compound": "h2o_ice",
+          "maxCount": 0
+        },
+        {
+          "compound": "h2o",
+          "minCount": 100
+        }
+      ],
+      "description": "Grid contains 0 pixels of Solid H₂O and at least 100 pixels of Liquid H₂O"
+    },
+    "starRequirements": {
+      "threeStarsMaxSeconds": 25,
+      "twoStarsMaxSeconds": 50
+    }
+  },
+  {
+    "id": "level_2_neutralizer",
+    "title": "The Neutralizer",
+    "category": "Acid-Base Chemistry",
+    "description": "Neutralize a corrosive puddle of acetic acid (vinegar) using pure baking soda to synthesize sodium acetate salt.",
+    "availableStoreItems": ["item_baking_soda", "item_lab_glass"],
+    "initialFunds": 75,
+    "initialGrid": [
+      {
+        "x": 80,
+        "y": 160,
+        "width": 40,
+        "height": 1,
+        "compound": "glass",
+        "tempK": 298.15
+      },
+      {
+        "x": 79,
+        "y": 145,
+        "width": 1,
+        "height": 16,
+        "compound": "glass",
+        "tempK": 298.15
+      },
+      {
+        "x": 120,
+        "y": 145,
+        "width": 1,
+        "height": 16,
+        "compound": "glass",
+        "tempK": 298.15
+      },
+      {
+        "x": 90,
+        "y": 156,
+        "width": 20,
+        "height": 3,
+        "compound": "ch3cooh",
+        "tempK": 298.15
+      }
+    ],
+    "winCondition": {
+      "type": "compound_bounds",
+      "conditions": [
+        {
+          "compound": "ch3cooh",
+          "maxCount": 0
+        },
+        {
+          "compound": "ch3coona",
+          "minCount": 51
+        }
+      ],
+      "description": "Grid contains 0 pixels of CH₃COOH and >50 pixels of Sodium Acetate (CH₃COONa)"
+    },
+    "starRequirements": {
+      "threeStarsMaxSeconds": 30,
+      "twoStarsMaxSeconds": 60
+    }
+  },
+  {
+    "id": "level_3_pressure_vessel",
+    "title": "Pressure Vessel",
+    "category": "Gas Dynamics",
+    "description": "Generate an intense volume of expanding gas through thermal vaporization without exceeding the glass pressure shattering threshold.",
+    "availableStoreItems": [
+      "item_tap_water",
+      "item_ammonia",
+      "item_bunsen_burner",
+      "item_lab_glass"
+    ],
+    "initialFunds": 100,
+    "winCondition": {
+      "type": "gas_containment",
+      "minGasCount": 500,
+      "glassShatterForbidden": true,
+      "description": "Generate 500 pixels of gas without exceeding the glass shattering threshold"
+    },
+    "starRequirements": {
+      "threeStarsMaxSeconds": 35,
+      "twoStarsMaxSeconds": 70
+    }
+  },
+  {
+    "id": "level_4_the_engine",
+    "title": "The Engine",
+    "category": "Thermodynamic Kinetics",
+    "description": "Direct high-velocity expanding steam vapor over a mechanical turbine stirrer to drive rotational kinetic energy.",
+    "availableStoreItems": [
+      "item_tap_water",
+      "item_bunsen_burner",
+      "item_cooling_plate",
+      "item_stirrer"
+    ],
+    "initialFunds": 120,
+    "winCondition": {
+      "type": "rotational_velocity",
+      "minRotationalVelocity": 5.0,
+      "sustainSeconds": 10.0,
+      "description": "Sustain a rotational velocity on the Stirrer of >5.0 rad/s for 10 consecutive seconds using only steam pressure"
+    },
+    "starRequirements": {
+      "threeStarsMaxSeconds": 40,
+      "twoStarsMaxSeconds": 80
+    }
+  },
+  {
+    "id": "level_5_controlled_demolition",
+    "title": "Controlled Demolition",
+    "category": "Blast Containment",
+    "description": "Safely detonate a block of volatile metallic sodium with water while using inert sand to absorb the shockwave and preserve surrounding glass.",
+    "availableStoreItems": [
+      "item_iron_filings",
+      "item_tap_water",
+      "item_oxygen_gas",
+      "item_play_sand"
+    ],
+    "initialFunds": 150,
+    "initialGrid": [
+      {
+        "x": 70,
+        "y": 170,
+        "width": 60,
+        "height": 2,
+        "compound": "glass",
+        "tempK": 298.15
+      },
+      {
+        "x": 68,
+        "y": 120,
+        "width": 2,
+        "height": 52,
+        "compound": "glass",
+        "tempK": 298.15
+      },
+      {
+        "x": 130,
+        "y": 120,
+        "width": 2,
+        "height": 52,
+        "compound": "glass",
+        "tempK": 298.15
+      },
+      {
+        "x": 95,
+        "y": 160,
+        "width": 10,
+        "height": 8,
+        "compound": "na",
+        "tempK": 298.15
+      }
+    ],
+    "winCondition": {
+      "type": "controlled_demolition",
+      "targetCompound": "na",
+      "maxCount": 0,
+      "glassShatterForbidden": true,
+      "description": "Destroy the Sodium block using water while the surrounding glass survives intact"
+    },
+    "starRequirements": {
+      "threeStarsMaxSeconds": 45,
+      "twoStarsMaxSeconds": 90
+    }
+  }
+]
