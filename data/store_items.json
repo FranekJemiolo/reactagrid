@@ -1,0 +1,214 @@
+[
+  {
+    "id": "item_tap_water",
+    "name": "Tap Water",
+    "category": "Basics",
+    "cost": 0,
+    "description": "Pure municipal tap water (100% H₂O). Essential fluid for dissolving salts, heat management, and mixing.",
+    "unlocked_by_default": true,
+    "composition": [
+      {
+        "compound": "h2o",
+        "percentage": 100
+      }
+    ],
+    "primary_compound": "h2o",
+    "icon": "Droplets"
+  },
+  {
+    "id": "item_play_sand",
+    "name": "Play Sand",
+    "category": "Basics",
+    "cost": 5,
+    "description": "Fine washed silica sand (100% SiO₂). Inert particulate useful for building barriers, retaining walls, and filtering.",
+    "unlocked_by_default": true,
+    "composition": [
+      {
+        "compound": "sio2",
+        "percentage": 100
+      }
+    ],
+    "primary_compound": "sio2",
+    "icon": "Layers"
+  },
+  {
+    "id": "item_baking_soda",
+    "name": "Baking Soda",
+    "category": "Household",
+    "cost": 10,
+    "description": "Pure sodium bicarbonate (100% NaHCO₃). Great for creating bubbly volcanic effervescence with weak acids.",
+    "unlocked_by_default": false,
+    "composition": [
+      {
+        "compound": "nahco3",
+        "percentage": 100
+      }
+    ],
+    "primary_compound": "nahco3",
+    "icon": "Box"
+  },
+  {
+    "id": "item_white_vinegar",
+    "name": "White Vinegar",
+    "category": "Household",
+    "cost": 15,
+    "description": "Dilute acetic acid solution (5% CH₃COOH, 95% H₂O). The foundation of kitchen science experiments.",
+    "unlocked_by_default": false,
+    "composition": [
+      {
+        "compound": "ch3cooh",
+        "percentage": 5
+      },
+      {
+        "compound": "h2o",
+        "percentage": 95
+      }
+    ],
+    "primary_compound": "ch3cooh",
+    "icon": "FlaskConical"
+  },
+  {
+    "id": "item_iron_filings",
+    "name": "Iron Filings",
+    "category": "Metals",
+    "cost": 25,
+    "description": "High-purity elemental iron filings (100% Fe). Dense, thermally conductive particles prone to rusting.",
+    "unlocked_by_default": false,
+    "composition": [
+      {
+        "compound": "fe",
+        "percentage": 100
+      }
+    ],
+    "primary_compound": "fe",
+    "icon": "Hammer"
+  },
+  {
+    "id": "item_household_bleach",
+    "name": "Household Bleach",
+    "category": "Cleaning",
+    "cost": 40,
+    "description": "Disinfectant solution (5% NaClO, 95% H₂O). CAUTION: Read warning labels carefully before mixing.",
+    "unlocked_by_default": false,
+    "composition": [
+      {
+        "compound": "naclo",
+        "percentage": 5
+      },
+      {
+        "compound": "h2o",
+        "percentage": 95
+      }
+    ],
+    "primary_compound": "naclo",
+    "icon": "AlertTriangle"
+  },
+  {
+    "id": "item_window_cleaner",
+    "name": "Window Cleaner",
+    "category": "Cleaning",
+    "cost": 40,
+    "description": "Glass cleaning solution with ammonia (5% NH₃, 95% H₂O). Volatile alkaline detergent.",
+    "unlocked_by_default": false,
+    "composition": [
+      {
+        "compound": "nh3",
+        "percentage": 5
+      },
+      {
+        "compound": "h2o",
+        "percentage": 95
+      }
+    ],
+    "primary_compound": "nh3",
+    "icon": "SprayCan"
+  },
+  {
+    "id": "item_sodium_metal",
+    "name": "Metallic Sodium",
+    "category": "Advanced",
+    "cost": 65,
+    "description": "Elemental alkali metal stored in mineral oil (100% Na). Highly reactive with water!",
+    "unlocked_by_default": false,
+    "composition": [
+      {
+        "compound": "na",
+        "percentage": 100
+      }
+    ],
+    "primary_compound": "na",
+    "icon": "Zap"
+  },
+  {
+    "id": "item_muriatic_acid",
+    "name": "Muriatic Acid",
+    "category": "Advanced",
+    "cost": 50,
+    "description": "Industrial hydrochloric acid solution (20% HCl, 80% H₂O). Extremely acidic and corrosive.",
+    "unlocked_by_default": false,
+    "composition": [
+      {
+        "compound": "hcl",
+        "percentage": 20
+      },
+      {
+        "compound": "h2o",
+        "percentage": 80
+      }
+    ],
+    "primary_compound": "hcl",
+    "icon": "Skull"
+  },
+  {
+    "id": "item_charcoal",
+    "name": "Activated Charcoal",
+    "category": "Basics",
+    "cost": 12,
+    "description": "Pure carbon granules (100% C). Combustible fuel for high temperature combustion studies.",
+    "unlocked_by_default": false,
+    "composition": [
+      {
+        "compound": "c",
+        "percentage": 100
+      }
+    ],
+    "primary_compound": "c",
+    "icon": "Flame"
+  },
+  {
+    "id": "item_quicklime",
+    "name": "Quicklime",
+    "category": "Advanced",
+    "cost": 35,
+    "description": "Calcium oxide powder (100% CaO). Slakes exothermically when in contact with water.",
+    "unlocked_by_default": false,
+    "composition": [
+      {
+        "compound": "cao",
+        "percentage": 100
+      }
+    ],
+    "primary_compound": "cao",
+    "icon": "Sun"
+  },
+  {
+    "id": "item_rubbing_alcohol",
+    "name": "Rubbing Alcohol",
+    "category": "Household",
+    "cost": 20,
+    "description": "Ethanol disinfectant (70% C₂H₅OH, 30% H₂O). Lightweight flammable fluid.",
+    "unlocked_by_default": false,
+    "composition": [
+      {
+        "compound": "c2h5oh",
+        "percentage": 70
+      },
+      {
+        "compound": "h2o",
+        "percentage": 30
+      }
+    ],
+    "primary_compound": "c2h5oh",
+    "icon": "Wine"
+  }
+]
