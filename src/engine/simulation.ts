@@ -40,6 +40,7 @@ export class SimulationEngine {
   public tickCount = 0;
   public currentTickId = 1;
   public renderMode: 'natural' | 'thermal' = 'natural';
+  public gravityMode: 1 | 0 | -1 = 1;
 
   public queuedEvents: ReactionEvent[] = [];
   public newlyDiscoveredCompounds: Set<string> = new Set();
@@ -205,6 +206,40 @@ export class SimulationEngine {
     }
   }
 
+  public getCellInfo(
+    x: number,
+    y: number,
+  ): {
+    x: number;
+    y: number;
+    compoundId: string;
+    name: string;
+    formula: string;
+    state: string;
+    density: number;
+    tempK: number;
+    hazardRating: number;
+  } | null {
+    if (x < 0 || x >= this.width || y < 0 || y >= this.height) return null;
+    const idx = y * this.width + x;
+    const type = this.typeGrid[idx];
+    const compoundId = this.getCompoundName(type);
+    const stateNum = this.stateLookup[type];
+    const stateStr = stateNum === 0 ? 'Gas' : stateNum === 1 ? 'Liquid' : 'Solid';
+
+    return {
+      x,
+      y,
+      compoundId,
+      name: compoundId === 'empty' ? 'Vacuum / Air' : compoundId,
+      formula: '',
+      state: stateStr,
+      density: Math.round(this.densityLookup[type] * 1000) / 1000,
+      tempK: Math.round(this.tempGrid[idx] * 10) / 10,
+      hazardRating: 0,
+    };
+  }
+
   public step(): void {
     this.tickCount++;
     this.currentTickId = (this.currentTickId % 254) + 1;
@@ -230,9 +265,42 @@ export class SimulationEngine {
     const tick = this.currentTickId;
     const densities = this.densityLookup;
     const states = this.stateLookup;
+    const grav = this.gravityMode;
 
-    // Scan bottom-up for falling solids/liquids
-    for (let y = h - 1; y >= 0; y--) {
+    // Microgravity / Zero-G Mode (grav === 0)
+    if (grav === 0) {
+      for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+          const idx = y * w + x;
+          const type = types[idx];
+          if (type === 0 || flags[idx] === tick) continue;
+
+          // Slow Brownian float / surface tension cohesion
+          if (Math.random() < 0.2) {
+            const dirX = Math.random() < 0.5 ? 1 : -1;
+            const dirY = Math.random() < 0.5 ? 1 : -1;
+            const targetX = x + dirX;
+            const targetY = y + dirY;
+
+            if (targetX >= 0 && targetX < w && targetY >= 0 && targetY < h) {
+              const targetIdx = targetY * w + targetX;
+              if (types[targetIdx] === 0) {
+                this.swap(idx, targetIdx);
+                flags[targetIdx] = tick;
+              }
+            }
+          }
+        }
+      }
+      return;
+    }
+
+    // Directional Gravity (1 = normal down, -1 = inverted up)
+    const yStart = grav === 1 ? h - 1 : 0;
+    const yEnd = grav === 1 ? -1 : h;
+    const yStep = grav === 1 ? -1 : 1;
+    const gDir = grav; // +1 = down, -1 = up
+    for (let y = yStart; y !== yEnd; y += yStep) {
       // Alternate left-right scanning to avoid directional bias
       const leftToRight = (y + this.tickCount) % 2 === 0;
       const startX = leftToRight ? 0 : w - 1;
@@ -246,14 +314,16 @@ export class SimulationEngine {
 
         const state = states[type];
         const density = densities[type];
+        const fallY = y + gDir;
+        const riseY = y - gDir;
 
         if (state === 2) {
           // SOLID (Sand, Iron, Baking Soda, etc.)
-          if (y + 1 < h) {
-            const belowIdx = (y + 1) * w + x;
+          if (fallY >= 0 && fallY < h) {
+            const belowIdx = fallY * w + x;
             const belowType = types[belowIdx];
 
-            // Falls straight down if below is empty or liquid (solids denser than liquids)
+            // Falls straight down if below is empty or liquid
             if (belowType === 0 || states[belowType] === 1) {
               this.swap(idx, belowIdx);
               flags[belowIdx] = tick;
@@ -266,7 +336,7 @@ export class SimulationEngine {
             const d2 = x - dir;
 
             if (d1 >= 0 && d1 < w) {
-              const diagIdx = (y + 1) * w + d1;
+              const diagIdx = fallY * w + d1;
               const diagType = types[diagIdx];
               if (diagType === 0) {
                 this.swap(idx, diagIdx);
@@ -276,7 +346,7 @@ export class SimulationEngine {
             }
 
             if (d2 >= 0 && d2 < w) {
-              const diagIdx = (y + 1) * w + d2;
+              const diagIdx = fallY * w + d2;
               const diagType = types[diagIdx];
               if (diagType === 0) {
                 this.swap(idx, diagIdx);
@@ -287,8 +357,8 @@ export class SimulationEngine {
           }
         } else if (state === 1) {
           // LIQUID (Water, Vinegar, Bleach, Ammonia, Acid, Alcohol)
-          if (y + 1 < h) {
-            const belowIdx = (y + 1) * w + x;
+          if (fallY >= 0 && fallY < h) {
+            const belowIdx = fallY * w + x;
             const belowType = types[belowIdx];
 
             // Falls down into empty space or swaps with lower-density liquid
@@ -304,7 +374,7 @@ export class SimulationEngine {
             const d2 = x - dir;
 
             if (d1 >= 0 && d1 < w) {
-              const diagIdx = (y + 1) * w + d1;
+              const diagIdx = fallY * w + d1;
               const diagType = types[diagIdx];
               if (diagType === 0 || (states[diagType] === 1 && densities[diagType] < density)) {
                 this.swap(idx, diagIdx);
@@ -314,7 +384,7 @@ export class SimulationEngine {
             }
 
             if (d2 >= 0 && d2 < w) {
-              const diagIdx = (y + 1) * w + d2;
+              const diagIdx = fallY * w + d2;
               const diagType = types[diagIdx];
               if (diagType === 0 || (states[diagType] === 1 && densities[diagType] < density)) {
                 this.swap(idx, diagIdx);
@@ -350,9 +420,9 @@ export class SimulationEngine {
           }
         } else if (state === 0) {
           // GAS (Steam, CO2, Chloramine, Hydrogen, Oxygen, Methane)
-          // Gases rise upward!
-          if (y - 1 >= 0) {
-            const aboveIdx = (y - 1) * w + x;
+          // Gases rise buoyant in direction opposite to gravity!
+          if (riseY >= 0 && riseY < h) {
+            const aboveIdx = riseY * w + x;
             const aboveType = types[aboveIdx];
 
             // Buoyancy: rises through vacuum, heavier gas, or liquid
@@ -372,7 +442,7 @@ export class SimulationEngine {
             const d2 = x - dir;
 
             if (d1 >= 0 && d1 < w) {
-              const diagIdx = (y - 1) * w + d1;
+              const diagIdx = riseY * w + d1;
               const diagType = types[diagIdx];
               if (
                 diagType === 0 ||
@@ -386,7 +456,7 @@ export class SimulationEngine {
             }
 
             if (d2 >= 0 && d2 < w) {
-              const diagIdx = (y - 1) * w + d2;
+              const diagIdx = riseY * w + d2;
               const diagType = types[diagIdx];
               if (
                 diagType === 0 ||

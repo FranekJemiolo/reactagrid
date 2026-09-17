@@ -164,6 +164,30 @@ describe('SimulationEngine - Core Physics and Chemistry Passes', () => {
     expect(engine.newlyDiscoveredCompounds.has('naoh')).toBe(true);
   });
 
+  it('handles microgravity (0G) and inverted gravity (-1G)', () => {
+    // Inverted gravity test (-1G)
+    engine.gravityMode = -1;
+    engine.setCell(10, 10, 'sio2');
+    engine.step();
+
+    // Sand should fall UP towards ceiling (y=9)
+    const sandId = engine.getSpeciesId('sio2');
+    expect(engine.typeGrid[9 * 20 + 10]).toBe(sandId);
+
+    // Microgravity test (0G)
+    engine.clear();
+    engine.gravityMode = 0;
+    engine.setCell(10, 10, 'h2o');
+    engine.step();
+
+    // Particle does not collapse straight to floor
+    expect(engine.typeGrid[19 * 20 + 10]).toBe(0);
+
+    // Cell info query
+    const info = engine.getCellInfo(10, 10);
+    expect(info).not.toBeNull();
+  });
+
   it('properly paints circular patterns and clears grid', () => {
     engine.paint(10, 10, 3, 'sio2');
     const sandId = engine.getSpeciesId('sio2');

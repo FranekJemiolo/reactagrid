@@ -17,6 +17,17 @@ export interface WorkerBridgeCallbacks {
     reward: number;
     discoveredProducts: string[];
   }) => void;
+  onCellInfo?: (info: {
+    x: number;
+    y: number;
+    compoundId: string;
+    name: string;
+    formula: string;
+    state: string;
+    density: number;
+    tempK: number;
+    hazardRating: number;
+  }) => void;
   onCompoundDiscovered?: (compoundId: string) => void;
   onStateExported?: (state: {
     types: Uint16Array;
@@ -52,6 +63,10 @@ export class SimulationWorkerBridge {
 
           case 'FRAME':
             this.callbacks.onFrame?.(msg.payload);
+            break;
+
+          case 'CELL_INFO':
+            this.callbacks.onCellInfo?.(msg.payload);
             break;
 
           case 'REACTION_OCCURRED':
@@ -98,6 +113,14 @@ export class SimulationWorkerBridge {
 
   public setRenderMode(mode: 'natural' | 'thermal'): void {
     this.send({ type: 'SET_RENDER_MODE', payload: { mode } });
+  }
+
+  public setGravity(gravity: 1 | 0 | -1): void {
+    this.send({ type: 'SET_GRAVITY', payload: { gravity } });
+  }
+
+  public queryCell(x: number, y: number): void {
+    this.send({ type: 'QUERY_CELL', payload: { x, y } });
   }
 
   public paint(cmd: PaintCommand): void {

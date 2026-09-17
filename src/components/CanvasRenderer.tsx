@@ -4,6 +4,7 @@ interface CanvasRendererProps {
   width: number;
   height: number;
   onPaint: (x: number, y: number) => void;
+  onHover?: (gridX: number, gridY: number, screenX: number, screenY: number) => void;
   pixelsRef: React.MutableRefObject<Uint32Array | null>;
   brushRadius: number;
 }
@@ -12,6 +13,7 @@ export const CanvasRenderer: React.FC<CanvasRendererProps> = ({
   width,
   height,
   onPaint,
+  onHover,
   pixelsRef,
   brushRadius,
 }) => {
@@ -94,6 +96,19 @@ export const CanvasRenderer: React.FC<CanvasRendererProps> = ({
     const coords = getGridCoords(e);
     if (coords) {
       setCursorPos(coords);
+
+      let clientX = 0;
+      let clientY = 0;
+      if ('touches' in e && e.touches.length > 0) {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+      } else if ('clientX' in e) {
+        clientX = e.clientX;
+        clientY = e.clientY;
+      }
+
+      onHover?.(coords.x, coords.y, clientX, clientY);
+
       if (isDrawing) {
         onPaint(coords.x, coords.y);
       }

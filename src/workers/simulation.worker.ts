@@ -132,6 +132,27 @@ self.addEventListener('message', (e: MessageEvent<MainToWorkerMessage>) => {
       break;
     }
 
+    case 'SET_GRAVITY': {
+      if (engine) {
+        engine.gravityMode = msg.payload.gravity;
+      }
+      break;
+    }
+
+    case 'QUERY_CELL': {
+      if (engine) {
+        const info = engine.getCellInfo(msg.payload.x, msg.payload.y);
+        if (info) {
+          const res: WorkerToMainMessage = {
+            type: 'CELL_INFO',
+            payload: info,
+          };
+          self.postMessage(res);
+        }
+      }
+      break;
+    }
+
     case 'CLEAR': {
       if (engine) {
         engine.clear();

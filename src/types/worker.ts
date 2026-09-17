@@ -17,6 +17,8 @@ export type MainToWorkerMessage =
   | { type: 'CLEAR' }
   | { type: 'PAINT'; payload: PaintCommand }
   | { type: 'SET_RENDER_MODE'; payload: { mode: 'natural' | 'thermal' } }
+  | { type: 'SET_GRAVITY'; payload: { gravity: 1 | 0 | -1 } }
+  | { type: 'QUERY_CELL'; payload: { x: number; y: number } }
   | { type: 'LOAD_STATE'; payload: { types: Uint16Array; temps: Float32Array } }
   | { type: 'REQUEST_STATE' };
 
@@ -30,6 +32,20 @@ export type WorkerToMainMessage =
         stepCount: number;
         activeParticles: number;
         avgTemperature: number;
+      };
+    }
+  | {
+      type: 'CELL_INFO';
+      payload: {
+        x: number;
+        y: number;
+        compoundId: string;
+        name: string;
+        formula: string;
+        state: string;
+        density: number;
+        tempK: number;
+        hazardRating: number;
       };
     }
   | {

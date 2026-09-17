@@ -25,6 +25,10 @@ interface HUDProps {
   onOpenSnapshots: () => void;
   renderMode: 'natural' | 'thermal';
   onToggleRenderMode: () => void;
+  gravity: 1 | 0 | -1;
+  onToggleGravity: () => void;
+  isProbeActive: boolean;
+  onToggleProbe: () => void;
   isMuted: boolean;
   onToggleMute: () => void;
   discoveredCount: number;
@@ -45,6 +49,10 @@ export const HUD: React.FC<HUDProps> = ({
   onOpenSnapshots,
   renderMode,
   onToggleRenderMode,
+  gravity,
+  onToggleGravity,
+  isProbeActive,
+  onToggleProbe,
   isMuted,
   onToggleMute,
   discoveredCount,
@@ -135,6 +143,31 @@ export const HUD: React.FC<HUDProps> = ({
           className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold shadow-lg shadow-amber-600/30 transition-all hover:scale-105 active:scale-95"
         >
           <span>Presets</span>
+        </button>
+
+        {/* Gravity Controls */}
+        <button
+          onClick={onToggleGravity}
+          id="toggle-gravity-button"
+          className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-900/80 border border-slate-700/60 text-slate-300 hover:text-white transition-all shadow-md"
+          title="Cycle Gravity: 1G Earth / 0G Microgravity / -1G Inverted"
+        >
+          <span>{gravity === 1 ? '1G ⬇' : gravity === 0 ? '0G 🪐' : '-1G ⬆'}</span>
+        </button>
+
+        {/* Pixel Probe Inspector Toggle */}
+        <button
+          onClick={onToggleProbe}
+          id="toggle-probe-button"
+          className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold border backdrop-blur-md transition-all ${
+            isProbeActive
+              ? 'bg-cyan-950/80 border-cyan-400 text-cyan-300 shadow-md shadow-cyan-500/30 scale-105'
+              : 'bg-slate-900/80 border-slate-700/60 text-slate-300 hover:text-white'
+          }`}
+          title="Toggle Pixel Probe Inspector"
+        >
+          <span>🔍</span>
+          <span className="hidden lg:inline">Probe</span>
         </button>
 
         {/* Thermal Vision Toggle */}

@@ -7,6 +7,7 @@ import { JournalModal } from './components/JournalModal';
 import { DiscoveryNotification, DiscoveryToast } from './components/DiscoveryNotification';
 import { SimulationWorkerBridge } from './engine/workerBridge';
 import { SnapshotsModal } from './components/SnapshotsModal';
+import { CellProbe, CellProbeData } from './components/CellProbe';
 import { sounds } from './audio/sound';
 import { ChemicalDatabase, StoreItem } from './types/chemistry';
 import { UserProgress } from './types/game';
@@ -32,6 +33,9 @@ export const App: React.FC = () => {
   const [avgTemp, setAvgTemp] = useState<number>(298.15);
   const [isRunning, setIsRunning] = useState<boolean>(true);
   const [renderMode, setRenderMode] = useState<'natural' | 'thermal'>('natural');
+  const [gravity, setGravity] = useState<1 | 0 | -1>(1);
+  const [isProbeActive, setIsProbeActive] = useState<boolean>(false);
+  const [probeData, setProbeData] = useState<CellProbeData | null>(null);
   const [isMuted, setIsMuted] = useState<boolean>(false);
 
   // Brush & Toolbar State
@@ -68,6 +72,48 @@ export const App: React.FC = () => {
     const next = renderMode === 'natural' ? 'thermal' : 'natural';
     setRenderMode(next);
     bridgeRef.current?.setRenderMode(next);
+  };
+
+  const handleToggleGravity = () => {
+    const next: 1 | 0 | -1 = gravity === 1 ? 0 : gravity === 0 ? -1 : 1;
+    setGravity(next);
+    bridgeRef.current?.setGravity(next);
+    addToast({
+      title: 'Gravity Altered',
+      message:
+        next === 1
+          ? 'Standard 1G Earth Gravity'
+          : next === 0
+            ? 'Microgravity 0G (Orbital Space)'
+            : 'Inverted -1G Gravity (Ceiling Pull)',
+    });
+  };
+
+  const handleToggleProbe = () => {
+    const next = !isProbeActive;
+    setIsProbeActive(next);
+    if (!next) setProbeData(null);
+  };
+
+  const handleCanvasHover = (gridX: number, gridY: number, screenX: number, screenY: number) => {
+    if (!isProbeActive) {
+      if (probeData !== null) setProbeData(null);
+      return;
+    }
+    setProbeData({
+      x: gridX,
+      y: gridY,
+      screenX,
+      screenY,
+      compoundId: 'empty',
+      name: '',
+      formula: '',
+      state: '',
+      density: 0,
+      tempK: 298.15,
+      hazardRating: 0,
+    });
+    bridgeRef.current?.queryCell(gridX, gridY);
   };
 
   const handleToggleMute = () => {
@@ -188,6 +234,11 @@ export const App: React.FC = () => {
           setFps(data.fps);
           setActiveParticles(data.activeParticles);
           setAvgTemp(data.avgTemperature);
+        },
+        onCellInfo: (info) => {
+          setProbeData((prev) =>
+            prev && prev.x === info.x && prev.y === info.y ? { ...prev, ...info } : null,
+          );
         },
         onReaction: (rxn) => {
           const current = progressRef.current;
@@ -385,6 +436,10 @@ export const App: React.FC = () => {
         onOpenSnapshots={() => setIsSnapshotsOpen(true)}
         renderMode={renderMode}
         onToggleRenderMode={handleToggleRenderMode}
+        gravity={gravity}
+        onToggleGravity={handleToggleGravity}
+        isProbeActive={isProbeActive}
+        onToggleProbe={handleToggleProbe}
         isMuted={isMuted}
         onToggleMute={handleToggleMute}
         discoveredCount={progress?.discoveredCompounds.length ?? 0}
@@ -396,9 +451,13 @@ export const App: React.FC = () => {
         width={GRID_WIDTH}
         height={GRID_HEIGHT}
         onPaint={handlePaint}
+        onHover={handleCanvasHover}
         pixelsRef={pixelsRef}
         brushRadius={brushRadius}
       />
+
+      {/* Real-time Pixel Probe Tooltip */}
+      <CellProbe data={probeData} molecules={chemicalDatabase.molecules} />
 
       {/* Brush & Chemical Selection Palette */}
       <BrushPalette
