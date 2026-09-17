@@ -414,4 +414,24 @@ describe('SimulationEngine - Core Physics and Chemistry Passes', () => {
     const cellAbove = engine.typeGrid[17 * 20 + 10];
     expect(cellAbove).not.toBe(h2o2Id);
   });
+
+  it('correctly tracks average, peak, and minimum tank temperatures in getStats', () => {
+    engine.clear();
+    // Initially empty grid returns ambient 298.15
+    const emptyStats = engine.getStats();
+    expect(emptyStats.activeParticles).toBe(0);
+    expect(emptyStats.avgTemperature).toBe(298.15);
+    expect(emptyStats.maxTemperature).toBe(298.15);
+    expect(emptyStats.minTemperature).toBe(298.15);
+
+    // Place a cold particle (ice at 250 K) and a hot particle (copper at 600 K)
+    engine.setCell(5, 5, 'h2o_ice', 250.0);
+    engine.setCell(15, 15, 'cu', 600.0);
+
+    const stats = engine.getStats();
+    expect(stats.activeParticles).toBe(2);
+    expect(stats.avgTemperature).toBeCloseTo(425.0, 1);
+    expect(stats.minTemperature).toBe(250.0);
+    expect(stats.maxTemperature).toBe(600.0);
+  });
 });

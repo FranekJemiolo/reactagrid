@@ -6,6 +6,7 @@ interface CanvasRendererProps {
   height: number;
   onPaint: (x: number, y: number) => void;
   onHover?: (gridX: number, gridY: number, screenX: number, screenY: number) => void;
+  onLeave?: () => void;
   pixelsRef: React.MutableRefObject<Uint32Array | null>;
   brushRadius: number;
   vfxRef?: React.MutableRefObject<VFXRenderer | null>;
@@ -51,6 +52,7 @@ export const CanvasRenderer: React.FC<CanvasRendererProps> = ({
   height,
   onPaint,
   onHover,
+  onLeave,
   pixelsRef,
   brushRadius,
   vfxRef,
@@ -256,6 +258,7 @@ export const CanvasRenderer: React.FC<CanvasRendererProps> = ({
       }
     } else if (!isDrawing) {
       setCursorPos(null);
+      onLeave?.();
     }
   };
 
@@ -268,6 +271,7 @@ export const CanvasRenderer: React.FC<CanvasRendererProps> = ({
     if (!isDrawing) {
       setCursorPos(null);
     }
+    onLeave?.();
   };
 
   return (

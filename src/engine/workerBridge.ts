@@ -9,6 +9,8 @@ export interface WorkerBridgeCallbacks {
     stepCount: number;
     activeParticles: number;
     avgTemperature: number;
+    maxTemperature?: number;
+    minTemperature?: number;
   }) => void;
   onReaction?: (reaction: {
     reactionId: string;

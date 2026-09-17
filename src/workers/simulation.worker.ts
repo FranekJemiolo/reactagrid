@@ -91,6 +91,8 @@ function tick() {
       stepCount: engine.tickCount,
       activeParticles: stats.activeParticles,
       avgTemperature: stats.avgTemperature,
+      maxTemperature: stats.maxTemperature,
+      minTemperature: stats.minTemperature,
     },
   };
 

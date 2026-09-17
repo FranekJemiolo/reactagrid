@@ -966,9 +966,16 @@ export class SimulationEngine {
     }
   }
 
-  public getStats(): { activeParticles: number; avgTemperature: number } {
+  public getStats(): {
+    activeParticles: number;
+    avgTemperature: number;
+    maxTemperature: number;
+    minTemperature: number;
+  } {
     let active = 0;
     let totalTemp = 0;
+    let maxTemp = 298.15;
+    let minTemp = 298.15;
     const size = this.size;
     const types = this.typeGrid;
     const temps = this.tempGrid;
@@ -976,13 +983,23 @@ export class SimulationEngine {
     for (let i = 0; i < size; i++) {
       if (types[i] !== 0) {
         active++;
-        totalTemp += temps[i];
+        const t = temps[i];
+        totalTemp += t;
+        if (active === 1) {
+          maxTemp = t;
+          minTemp = t;
+        } else {
+          if (t > maxTemp) maxTemp = t;
+          if (t < minTemp) minTemp = t;
+        }
       }
     }
 
     return {
       activeParticles: active,
       avgTemperature: active > 0 ? totalTemp / active : 298.15,
+      maxTemperature: maxTemp,
+      minTemperature: minTemp,
     };
   }
 }

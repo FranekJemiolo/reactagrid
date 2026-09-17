@@ -55,10 +55,14 @@ export const CellProbe: React.FC<CellProbeProps> = ({ data, molecules }) => {
           <span>{data.density}g</span>
         </div>
         <div>
-          <span className="text-slate-500">Temp: </span>
-          <span className="text-amber-300">
+          <span className="text-slate-500">Local Temp: </span>
+          <span className="text-amber-300 font-semibold">
             {tempC}°C ({Math.round(data.tempK)}K)
           </span>
+        </div>
+        <div>
+          <span className="text-slate-500">Ambient: </span>
+          <span className="text-slate-400">25°C (298K)</span>
         </div>
         <div>
           <span className="text-slate-500">Grid: </span>

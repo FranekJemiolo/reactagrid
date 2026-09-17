@@ -42,6 +42,15 @@ interface HUDProps {
   onOpenShortcuts: () => void;
   onOpenTutorial?: () => void;
   onOpenCampaign?: () => void;
+  maxTemperature?: number;
+  minTemperature?: number;
+  hoveredCell?: {
+    x: number;
+    y: number;
+    compoundId: string;
+    name: string;
+    tempK: number;
+  } | null;
   discoveredCount: number;
   totalCompoundsCount: number;
 }
@@ -50,6 +59,9 @@ export const HUD: React.FC<HUDProps> = ({
   fps,
   activeParticles,
   avgTemperature,
+  maxTemperature,
+  minTemperature,
+  hoveredCell,
   funds,
   isRunning,
   onTogglePlay,
@@ -76,6 +88,10 @@ export const HUD: React.FC<HUDProps> = ({
   totalCompoundsCount,
 }) => {
   const tempCelsius = Math.round(avgTemperature - 273.15);
+  const maxCelsius =
+    maxTemperature !== undefined ? Math.round(maxTemperature - 273.15) : tempCelsius;
+  const minCelsius =
+    minTemperature !== undefined ? Math.round(minTemperature - 273.15) : tempCelsius;
 
   const getFpsColor = (fpsVal: number) => {
     if (fpsVal >= 55) return 'text-emerald-400 bg-emerald-950/40 border-emerald-500/30';
@@ -110,12 +126,50 @@ export const HUD: React.FC<HUDProps> = ({
           <span>{activeParticles.toLocaleString()} particles</span>
         </div>
 
-        <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl font-mono text-xs bg-slate-900/80 backdrop-blur-md border border-slate-700/60 text-amber-300 shadow-md">
-          <Thermometer className="w-3.5 h-3.5" />
-          <span>
+        {/* Tank Average Temperature with Peak & Low Heat Indicators */}
+        <div
+          className="hidden md:flex items-center gap-2 px-2.5 py-1.5 rounded-xl font-mono text-xs bg-slate-900/80 backdrop-blur-md border border-slate-700/60 text-amber-300 shadow-md cursor-help transition-all hover:border-amber-500/50"
+          id="temperature-telemetry"
+          title={`Tank Average Temperature: ${tempCelsius}°C (${Math.round(avgTemperature)} K)\n\n• Baseline Room Ambient: 25°C (298.15 K)\n• Tank Peak Temperature: ${maxCelsius}°C\n• Tank Lowest Temperature: ${minCelsius}°C\n\nClick the Inspector Probe [🔍] or hover cells to read localized temperature.`}
+        >
+          <Thermometer className="w-3.5 h-3.5 text-amber-400" />
+          <span className="text-slate-400 font-sans text-[11px] font-medium">Tank Avg:</span>
+          <span className="font-bold">
             {tempCelsius}°C ({Math.round(avgTemperature)} K)
           </span>
+
+          {maxTemperature !== undefined && maxCelsius > tempCelsius + 10 && (
+            <span
+              className="text-rose-400 text-[10px] pl-1.5 border-l border-slate-700 font-semibold"
+              title={`Hottest active cell in tank: ${maxCelsius}°C`}
+            >
+              Peak: {maxCelsius}°C
+            </span>
+          )}
+
+          {minTemperature !== undefined && minCelsius < tempCelsius - 10 && (
+            <span
+              className="text-cyan-400 text-[10px] pl-1.5 border-l border-slate-700 font-semibold"
+              title={`Coldest active cell in tank: ${minCelsius}°C`}
+            >
+              Low: {minCelsius}°C
+            </span>
+          )}
         </div>
+
+        {/* Live Local Cell Temperature under Cursor */}
+        {hoveredCell && hoveredCell.compoundId !== 'empty' && (
+          <div
+            className="hidden xl:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl font-mono text-xs bg-slate-900/80 backdrop-blur-md border border-sky-500/40 text-sky-300 shadow-md"
+            title={`Local cell temperature at (${hoveredCell.x}, ${hoveredCell.y}): ${Math.round(hoveredCell.tempK - 273.15)}°C`}
+          >
+            <span className="text-slate-400 font-sans text-[11px] font-medium">Local:</span>
+            <span className="font-bold text-white">{Math.round(hoveredCell.tempK - 273.15)}°C</span>
+            <span className="text-sky-400 text-[10px] font-sans">
+              ({hoveredCell.name || hoveredCell.compoundId})
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Economy Wallet & Modals Trigger */}

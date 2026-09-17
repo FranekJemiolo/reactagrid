@@ -41,6 +41,15 @@ export const App: React.FC = () => {
   const [fps, setFps] = useState<number>(60);
   const [activeParticles, setActiveParticles] = useState<number>(0);
   const [avgTemp, setAvgTemp] = useState<number>(298.15);
+  const [maxTemp, setMaxTemp] = useState<number>(298.15);
+  const [minTemp, setMinTemp] = useState<number>(298.15);
+  const [hoveredCell, setHoveredCell] = useState<{
+    x: number;
+    y: number;
+    compoundId: string;
+    name: string;
+    tempK: number;
+  } | null>(null);
   const [isRunning, setIsRunning] = useState<boolean>(true);
   const [renderMode, setRenderMode] = useState<'natural' | 'thermal'>('natural');
   const [gravity, setGravity] = useState<1 | 0 | -1>(1);
@@ -121,24 +130,31 @@ export const App: React.FC = () => {
   };
 
   const handleCanvasHover = (gridX: number, gridY: number, screenX: number, screenY: number) => {
-    if (!isProbeActive) {
-      if (probeData !== null) setProbeData(null);
-      return;
+    if (isProbeActive) {
+      setProbeData({
+        x: gridX,
+        y: gridY,
+        screenX,
+        screenY,
+        compoundId: 'empty',
+        name: '',
+        formula: '',
+        state: '',
+        density: 0,
+        tempK: 298.15,
+        hazardRating: 0,
+      });
+    } else if (probeData !== null) {
+      setProbeData(null);
     }
-    setProbeData({
-      x: gridX,
-      y: gridY,
-      screenX,
-      screenY,
-      compoundId: 'empty',
-      name: '',
-      formula: '',
-      state: '',
-      density: 0,
-      tempK: 298.15,
-      hazardRating: 0,
-    });
     bridgeRef.current?.queryCell(gridX, gridY);
+  };
+
+  const handleCanvasLeave = () => {
+    setHoveredCell(null);
+    if (probeData !== null) {
+      setProbeData(null);
+    }
   };
 
   const handleToggleMute = () => {
@@ -297,6 +313,8 @@ export const App: React.FC = () => {
           setFps(data.fps);
           setActiveParticles(data.activeParticles);
           setAvgTemp(data.avgTemperature);
+          if (data.maxTemperature !== undefined) setMaxTemp(data.maxTemperature);
+          if (data.minTemperature !== undefined) setMinTemp(data.minTemperature);
         },
         onLevelWon: (payload) => {
           const current = progressRef.current;
@@ -334,6 +352,13 @@ export const App: React.FC = () => {
           setProbeData((prev) =>
             prev && prev.x === info.x && prev.y === info.y ? { ...prev, ...info } : null,
           );
+          setHoveredCell({
+            x: info.x,
+            y: info.y,
+            compoundId: info.compoundId,
+            name: info.name,
+            tempK: info.tempK,
+          });
         },
         onReaction: (rxn) => {
           const current = progressRef.current;
@@ -688,6 +713,9 @@ export const App: React.FC = () => {
         fps={fps}
         activeParticles={activeParticles}
         avgTemperature={avgTemp}
+        maxTemperature={maxTemp}
+        minTemperature={minTemp}
+        hoveredCell={hoveredCell}
         funds={progress?.funds ?? 0}
         isRunning={isRunning}
         onTogglePlay={handleTogglePlay}
@@ -739,6 +767,7 @@ export const App: React.FC = () => {
         height={GRID_HEIGHT}
         onPaint={handlePaint}
         onHover={handleCanvasHover}
+        onLeave={handleCanvasLeave}
         pixelsRef={pixelsRef}
         brushRadius={brushRadius}
         vfxRef={vfxRef}

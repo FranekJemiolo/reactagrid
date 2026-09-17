@@ -36,6 +36,8 @@ export type WorkerToMainMessage =
         stepCount: number;
         activeParticles: number;
         avgTemperature: number;
+        maxTemperature?: number;
+        minTemperature?: number;
       };
     }
   | {
