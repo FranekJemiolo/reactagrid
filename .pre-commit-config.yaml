@@ -1,0 +1,31 @@
+repos:
+  - repo: local
+    hooks:
+      - id: prettier
+        name: prettier format check
+        description: Check code formatting with Prettier
+        entry: npx prettier --check
+        language: system
+        files: \.(ts|tsx|js|json|css|md|yaml|yml)$
+        pass_filenames: true
+
+      - id: lint
+        name: eslint
+        description: Run ESLint
+        entry: npm run lint
+        language: system
+        pass_filenames: false
+
+      - id: type-check
+        name: type check
+        description: Verify TypeScript types
+        entry: npm run type-check
+        language: system
+        pass_filenames: false
+
+      - id: unit-tests
+        name: unit tests
+        description: Run Vitest unit tests
+        entry: npm run test
+        language: system
+        pass_filenames: false

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="flaskGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#6366f1" />
+    </linearGradient>
+    <radialGradient id="bubbleGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#34d399" />
+      <stop offset="100%" stop-color="#059669" />
+    </radialGradient>
+  </defs>
+  <rect width="100" height="100" rx="24" fill="#090d16" />
+  <path d="M42 22 L58 22 L58 36 L74 68 C77 74 72 80 66 80 L34 80 C28 80 23 74 26 68 L42 36 Z" 
+        fill="none" stroke="url(#flaskGrad)" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M32 64 C40 60 60 68 68 64 L65 76 L35 76 Z" fill="url(#flaskGrad)" opacity="0.65" />
+  <circle cx="46" cy="54" r="4" fill="url(#bubbleGrad)" />
+  <circle cx="56" cy="46" r="3" fill="#38bdf8" />
+  <circle cx="50" cy="38" r="2.5" fill="#a7f3d0" />
+</svg>
