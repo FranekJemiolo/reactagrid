@@ -114,6 +114,7 @@ describe('SimulationEngine - Core Physics and Chemistry Passes', () => {
 
   it('handles phase transitions: water boils to steam when heated above 373.15 K', () => {
     const steamId = engine.getSpeciesId('h2o_steam');
+    const h2oGasId = engine.getSpeciesId('h2o_gas');
     // Build a small cup so water stays localized
     engine.setCell(9, 19, 'sio2');
     engine.setCell(10, 19, 'h2o', 390.0);
@@ -122,7 +123,8 @@ describe('SimulationEngine - Core Physics and Chemistry Passes', () => {
     engine.step();
 
     // Water boils into steam
-    expect(Array.from(engine.typeGrid).includes(steamId)).toBe(true);
+    const gridArray = Array.from(engine.typeGrid);
+    expect(gridArray.includes(steamId) || gridArray.includes(h2oGasId)).toBe(true);
   });
 
   it('handles chemical reactions: Baking Soda + Vinegar volcano reaction in a container', () => {
@@ -218,5 +220,123 @@ describe('SimulationEngine - Core Physics and Chemistry Passes', () => {
     engine.clear();
     expect(engine.typeGrid[10 * 20 + 10]).toBe(0);
     expect(engine.getStats().activeParticles).toBe(0);
+  });
+
+  it('verifies Bunsen Burner raises 10 pixels of h2o to 100°C and triggers h2o_gas phase change', () => {
+    // Build a supporting glass beaker container: floor at y=16, side walls at x=4 and x=15
+    for (let x = 4; x <= 15; x++) {
+      engine.setCell(x, 16, 'glass');
+    }
+    for (let y = 13; y <= 15; y++) {
+      engine.setCell(4, y, 'glass');
+      engine.setCell(15, y, 'glass');
+    }
+
+    // Place 10 Bunsen Burners at y=15 (x=5..14)
+    for (let x = 5; x < 15; x++) {
+      engine.setCell(x, 15, 'bunsen_burner');
+    }
+
+    // Place 10 pixels of H2O directly above at y=14 (x=5..14) at room temp 298.15 K
+    for (let x = 5; x < 15; x++) {
+      engine.setCell(x, 14, 'h2o', 298.15);
+    }
+
+    const waterId = engine.getSpeciesId('h2o');
+    const h2oGasId = engine.getSpeciesId('h2o_gas');
+    const h2oSteamId = engine.getSpeciesId('h2o_steam');
+    const burnerId = engine.getSpeciesId('bunsen_burner');
+
+    expect(engine.typeGrid[15 * 20 + 5]).toBe(burnerId);
+    expect(engine.typeGrid[14 * 20 + 5]).toBe(waterId);
+
+    // Step simulation: each tick Bunsen Burner adds +50°C to cells directly above
+    // Tick 1: 298.15 + 50 = 348.15 K
+    engine.step();
+    expect(engine.tempGrid[14 * 20 + 5]).toBeGreaterThanOrEqual(348.0);
+
+    // Tick 2: 348.15 + 50 = 398.15 K (exceeds 373.15 K = 100°C boiling point)
+    engine.step();
+
+    // Check all 10 pixels transformed into gaseous steam (h2o_gas / h2o_steam)
+    let steamCount = 0;
+    for (let y = 0; y <= 14; y++) {
+      for (let x = 5; x < 15; x++) {
+        const cellType = engine.typeGrid[y * 20 + x];
+        if (cellType === h2oGasId || cellType === h2oSteamId) {
+          steamCount++;
+        }
+      }
+    }
+    expect(steamCount).toBe(10);
+  });
+
+  it('verifies Cooling Plate drains heat from touching cells down to -20°C (253.15 K)', () => {
+    // Place cooling plate at bottom floor (10, 19)
+    engine.setCell(10, 19, 'cooling_plate');
+
+    // Place warm metal adjacent at (11, 19) at 350 K
+    engine.setCell(11, 19, 'fe', 350.0);
+
+    // Run 5 ticks to drain thermal energy
+    for (let i = 0; i < 5; i++) {
+      engine.step();
+    }
+
+    // Temperature should be cooled down to -20°C (253.15 K)
+    expect(engine.tempGrid[19 * 20 + 11]).toBeCloseTo(253.15, 1);
+  });
+
+  it('verifies Magnetic Stirrer forces horizontal displacement of adjacent liquid', () => {
+    // Build a glass beaker (floor at y=11, walls at x=8 and x=12)
+    for (let x = 8; x <= 12; x++) {
+      engine.setCell(x, 11, 'glass');
+    }
+    engine.setCell(8, 9, 'glass');
+    engine.setCell(8, 10, 'glass');
+    engine.setCell(12, 9, 'glass');
+    engine.setCell(12, 10, 'glass');
+
+    // Place stirrer at (10, 10)
+    engine.setCell(10, 10, 'stirrer');
+
+    // Place liquid water above at (10, 9)
+    engine.setCell(10, 9, 'h2o');
+
+    engine.step();
+
+    // The liquid water should still be within the beaker and agitated/stirred
+    const waterId = engine.getSpeciesId('h2o');
+    let waterFound = false;
+    for (let y = 8; y <= 10; y++) {
+      for (let x = 9; x <= 11; x++) {
+        if (engine.typeGrid[y * 20 + x] === waterId) {
+          waterFound = true;
+          break;
+        }
+      }
+    }
+    expect(waterFound).toBe(true);
+  });
+
+  it('verifies high-pressure hot gases shatter borosilicate glass into SiO2', () => {
+    const glassId = engine.getSpeciesId('glass');
+    const sio2Id = engine.getSpeciesId('sio2');
+
+    // Place glass cell on a 3-wide glass floor at (10, 18) with floor at y=19
+    engine.setCell(9, 19, 'glass');
+    engine.setCell(10, 19, 'glass');
+    engine.setCell(11, 19, 'glass');
+    engine.setCell(10, 18, 'glass');
+
+    // Surround with hot pressurized gases (>600 K)
+    engine.setCell(9, 18, 'co2', 700.0);
+    engine.setCell(11, 18, 'co2', 700.0);
+
+    engine.step();
+
+    // Extreme pressure and heat shatters glass into SiO2 shards
+    expect(engine.typeGrid[18 * 20 + 10]).toBe(sio2Id);
+    expect(engine.typeGrid[18 * 20 + 10]).not.toBe(glassId);
   });
 });

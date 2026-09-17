@@ -55,12 +55,13 @@ export const BrushPalette: React.FC<BrushPaletteProps> = ({
         </div>
 
         {/* Temperature Modifier */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5" id="temperature-modifier-tools">
           <span className="text-slate-400 font-medium hidden sm:inline">Temp:</span>
           {tempOptions.map((opt) => (
             <button
               key={opt.temp}
               onClick={() => onSelectTemp(opt.temp)}
+              id={opt.label === '150°C' ? 'temp-heat-tool' : `temp-option-${Math.round(opt.temp)}`}
               className={`px-2 py-1 rounded-lg flex items-center gap-1 font-mono transition-all ${
                 Math.abs(brushTempK - opt.temp) < 1
                   ? 'bg-slate-800 text-white border border-slate-600 shadow-sm'

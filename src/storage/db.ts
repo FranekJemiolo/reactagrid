@@ -41,6 +41,8 @@ export const INITIAL_PROGRESS: UserProgress = {
   discoveredCompounds: ['h2o', 'sio2', 'glass'],
   totalReactionsTriggered: 0,
   energyGeneratedKj: 0,
+  hasCompletedTutorial: false,
+  completedLevels: {},
 };
 
 export async function loadProgress(): Promise<UserProgress> {

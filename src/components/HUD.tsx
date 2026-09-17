@@ -12,6 +12,8 @@ import {
   Camera,
   HelpCircle,
   FastForward,
+  GraduationCap,
+  Trophy,
 } from 'lucide-react';
 
 interface HUDProps {
@@ -38,6 +40,8 @@ interface HUDProps {
   onCycleSpeed: () => void;
   onExportSnapshot: () => void;
   onOpenShortcuts: () => void;
+  onOpenTutorial?: () => void;
+  onOpenCampaign?: () => void;
   discoveredCount: number;
   totalCompoundsCount: number;
 }
@@ -66,6 +70,8 @@ export const HUD: React.FC<HUDProps> = ({
   onCycleSpeed,
   onExportSnapshot,
   onOpenShortcuts,
+  onOpenTutorial,
+  onOpenCampaign,
   discoveredCount,
   totalCompoundsCount,
 }) => {
@@ -228,6 +234,30 @@ export const HUD: React.FC<HUDProps> = ({
         >
           {isMuted ? '🔇' : '🔊'}
         </button>
+
+        {/* Interactive Guided Tutorial */}
+        {onOpenTutorial && (
+          <button
+            onClick={onOpenTutorial}
+            id="open-tutorial-button"
+            className="p-1.5 rounded-xl bg-slate-900/80 border border-slate-700/60 text-slate-300 hover:text-white transition-colors"
+            title="Interactive Tutorial"
+          >
+            <GraduationCap className="w-4 h-4 text-emerald-400" />
+          </button>
+        )}
+
+        {/* Campaign Levels Mode */}
+        {onOpenCampaign && (
+          <button
+            onClick={onOpenCampaign}
+            id="open-campaign-button"
+            className="p-1.5 rounded-xl bg-slate-900/80 border border-slate-700/60 text-slate-300 hover:text-white transition-colors"
+            title="Campaign Missions & Levels"
+          >
+            <Trophy className="w-4 h-4 text-amber-400" />
+          </button>
+        )}
 
         {/* Keyboard Shortcuts Guide */}
         <button

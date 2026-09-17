@@ -2,6 +2,8 @@
 
 import { SimulationEngine } from '../engine/simulation';
 import { MainToWorkerMessage, WorkerToMainMessage } from '../types/worker';
+import { CampaignLevel } from '../types/campaign';
+import { checkWinCondition } from '../engine/campaign';
 
 let engine: SimulationEngine | null = null;
 let isRunning = false;
@@ -11,6 +13,8 @@ let frameCount = 0;
 let currentFps = 60;
 let speedMultiplier = 1;
 let subTickAccumulator = 0;
+let activeCampaignLevel: CampaignLevel | null = null;
+let hasWonCampaignLevel = false;
 
 function tick() {
   if (!engine) return;
@@ -58,6 +62,21 @@ function tick() {
       self.postMessage(msg);
     }
     engine.newlyDiscoveredCompounds.clear();
+  }
+
+  // Check active campaign win condition
+  if (
+    activeCampaignLevel &&
+    !hasWonCampaignLevel &&
+    frameCount % 5 === 0 &&
+    checkWinCondition(activeCampaignLevel, engine)
+  ) {
+    hasWonCampaignLevel = true;
+    const winMsg: WorkerToMainMessage = {
+      type: 'LEVEL_WON',
+      payload: { levelId: activeCampaignLevel.id },
+    };
+    self.postMessage(winMsg);
   }
 
   // Export frame buffer
@@ -187,6 +206,12 @@ self.addEventListener('message', (e: MessageEvent<MainToWorkerMessage>) => {
         engine.tempGrid.set(msg.payload.temps);
         tick();
       }
+      break;
+    }
+
+    case 'SET_CAMPAIGN_LEVEL': {
+      activeCampaignLevel = msg.payload.level;
+      hasWonCampaignLevel = false;
       break;
     }
 

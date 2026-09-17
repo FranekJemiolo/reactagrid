@@ -1,5 +1,6 @@
 import { ChemicalDatabase } from '../types/chemistry';
 import { MainToWorkerMessage, WorkerToMainMessage, PaintCommand } from '../types/worker';
+import { CampaignLevel } from '../types/campaign';
 
 export interface WorkerBridgeCallbacks {
   onFrame?: (data: {
@@ -35,6 +36,7 @@ export interface WorkerBridgeCallbacks {
     width: number;
     height: number;
   }) => void;
+  onLevelWon?: (payload: { levelId: string }) => void;
 }
 
 export class SimulationWorkerBridge {
@@ -79,6 +81,10 @@ export class SimulationWorkerBridge {
 
           case 'STATE_EXPORTED':
             this.callbacks.onStateExported?.(msg.payload);
+            break;
+
+          case 'LEVEL_WON':
+            this.callbacks.onLevelWon?.(msg.payload);
             break;
         }
       };
@@ -137,6 +143,10 @@ export class SimulationWorkerBridge {
 
   public loadState(types: Uint16Array, temps: Float32Array): void {
     this.send({ type: 'LOAD_STATE', payload: { types, temps } });
+  }
+
+  public setCampaignLevel(level: CampaignLevel | null): void {
+    this.send({ type: 'SET_CAMPAIGN_LEVEL', payload: { level } });
   }
 
   public terminate(): void {

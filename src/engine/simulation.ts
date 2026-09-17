@@ -118,7 +118,12 @@ export class SimulationEngine {
       this.conductivityLookup[index] = mol.thermal_conductivity;
       this.boilingPointLookup[index] = mol.boiling_point_k;
       this.meltingPointLookup[index] = mol.melting_point_k;
-      this.isStaticLookup[index] = mol.id === 'glass' ? 1 : 0;
+      const isStatic =
+        mol.id === 'glass' ||
+        mol.id === 'bunsen_burner' ||
+        mol.id === 'cooling_plate' ||
+        mol.id === 'stirrer';
+      this.isStaticLookup[index] = isStatic ? 1 : 0;
 
       index++;
     }
@@ -248,17 +253,119 @@ export class SimulationEngine {
     this.tickCount++;
     this.currentTickId = (this.currentTickId % 254) + 1;
 
-    // 1. Gravity & Density Physics Pass
+    // 1. Lab Equipment Pass (Bunsen Burners, Cooling Plates, Stirrers, Shatter Stress)
+    this.stepEquipment();
+
+    // 2. Gravity & Density Physics Pass
     this.stepPhysics();
 
-    // 2. Thermodynamics Pass (Heat conduction & Phase shifts)
+    // 3. Thermodynamics Pass (Heat conduction & Phase shifts)
     this.stepThermodynamics();
 
-    // 3. Chemistry Adjacency Pass
+    // 4. Chemistry Adjacency Pass
     this.stepChemistry();
 
-    // 4. Color Buffer Render
+    // 5. Color Buffer Render
     this.renderColorBuffer();
+  }
+
+  private stepEquipment(): void {
+    const w = this.width;
+    const h = this.height;
+    const types = this.typeGrid;
+    const temps = this.tempGrid;
+    const states = this.stateLookup;
+
+    const burnerId = this.getSpeciesId('bunsen_burner');
+    const coolerId = this.getSpeciesId('cooling_plate');
+    const stirrerId = this.getSpeciesId('stirrer');
+    const glassId = this.getSpeciesId('glass');
+    const sio2Id = this.getSpeciesId('sio2');
+
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const idx = y * w + x;
+        const type = types[idx];
+        if (type === 0) continue;
+
+        // 1. Bunsen Burner: Continuously adds +50°C heat per tick to the cells directly above it
+        if (type === burnerId) {
+          temps[idx] = Math.max(temps[idx], 500.0);
+          if (y > 0) {
+            const aboveIdx = (y - 1) * w + x;
+            temps[aboveIdx] += 50.0;
+          }
+        }
+        // 2. Cooling Plate: Continuously drains heat from cells touching it down to -20°C (253.15 K)
+        else if (type === coolerId) {
+          temps[idx] = 253.15;
+          const neighbors = [
+            x + 1 < w ? y * w + (x + 1) : -1,
+            x - 1 >= 0 ? y * w + (x - 1) : -1,
+            y + 1 < h ? (y + 1) * w + x : -1,
+            y - 1 >= 0 ? (y - 1) * w + x : -1,
+          ];
+          for (const nIdx of neighbors) {
+            if (nIdx !== -1 && types[nIdx] !== 0) {
+              if (temps[nIdx] > 253.15) {
+                temps[nIdx] = Math.max(253.15, temps[nIdx] - 25.0);
+              }
+            }
+          }
+        }
+        // 3. Stirrer: Applies horizontal velocity vectors to adjacent liquid pixels to force mixing
+        else if (type === stirrerId) {
+          const adjacent = [
+            { nx: x, ny: y - 1, pushX: 1, pushY: 0 },
+            { nx: x + 1, ny: y, pushX: 0, pushY: 1 },
+            { nx: x, ny: y + 1, pushX: -1, pushY: 0 },
+            { nx: x - 1, ny: y, pushX: 0, pushY: -1 },
+          ];
+          for (const adj of adjacent) {
+            if (adj.nx >= 0 && adj.nx < w && adj.ny >= 0 && adj.ny < h) {
+              const adjIdx = adj.ny * w + adj.nx;
+              const adjType = types[adjIdx];
+              if (states[adjType] === 1) {
+                const destX = adj.nx + adj.pushX;
+                const destY = adj.ny + adj.pushY;
+                if (destX >= 0 && destX < w && destY >= 0 && destY < h) {
+                  const destIdx = destY * w + destX;
+                  const destType = types[destIdx];
+                  if (destType === 0 || states[destType] === 1) {
+                    this.swap(adjIdx, destIdx);
+                  }
+                }
+              }
+            }
+          }
+        }
+        // 4. Glass Pressure Containment & High-Pressure Shattering
+        else if (type === glassId) {
+          let hotGasesNearby = 0;
+          let maxTemp = 0;
+          const neighbors = [
+            x + 1 < w ? y * w + (x + 1) : -1,
+            x - 1 >= 0 ? y * w + (x - 1) : -1,
+            y + 1 < h ? (y + 1) * w + x : -1,
+            y - 1 >= 0 ? (y - 1) * w + x : -1,
+          ];
+          for (const nIdx of neighbors) {
+            if (nIdx !== -1) {
+              const nType = types[nIdx];
+              const nTemp = temps[nIdx];
+              if (states[nType] === 0 && nTemp > 500) {
+                hotGasesNearby++;
+                if (nTemp > maxTemp) maxTemp = nTemp;
+              }
+            }
+          }
+          if (hotGasesNearby >= 2 && maxTemp >= 600) {
+            types[idx] = sio2Id || 0;
+            temps[idx] = maxTemp;
+          }
+        }
+      }
+    }
   }
 
   private stepPhysics(): void {
@@ -504,7 +611,9 @@ export class SimulationEngine {
     const boilingPoints = this.boilingPointLookup;
     const meltingPoints = this.meltingPointLookup;
 
-    const steamId = this.getSpeciesId('h2o_steam');
+    const h2oGasId = this.getSpeciesId('h2o_gas');
+    const steamId = h2oGasId !== 0 ? h2oGasId : this.getSpeciesId('h2o_steam');
+    const altSteamId = this.getSpeciesId('h2o_steam');
     const waterId = this.getSpeciesId('h2o');
     const iceId = this.getSpeciesId('h2o_ice');
 
@@ -523,7 +632,7 @@ export class SimulationEngine {
           } else if (t <= meltingPoints[waterId] && meltingPoints[waterId] > 0) {
             types[idx] = iceId;
           }
-        } else if (type === steamId && t < 370.0) {
+        } else if ((type === steamId || type === altSteamId) && t < 370.0) {
           types[idx] = waterId;
         } else if (type === iceId && t > 273.15) {
           types[idx] = waterId;

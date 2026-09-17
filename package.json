@@ -22,6 +22,7 @@
     "test:e2e": "playwright test",
     "stress-test": "npx tsx scripts/stress_test.ts",
     "pipeline": "python3 data-pipeline/extract_chemistry.py",
+    "pipeline:etl": "python3 data-pipeline/etl_ingestion.py",
     "pipeline:validate": "python3 data-pipeline/validate_schema.py"
   },
   "dependencies": {

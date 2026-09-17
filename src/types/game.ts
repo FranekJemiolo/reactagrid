@@ -16,6 +16,8 @@ export interface UserProgress {
   discoveredCompounds: string[];
   totalReactionsTriggered: number;
   energyGeneratedKj: number;
+  hasCompletedTutorial: boolean;
+  completedLevels: Record<string, number>; // levelId -> stars (1-3)
 }
 
 export interface JournalEntry {

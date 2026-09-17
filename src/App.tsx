@@ -8,21 +8,29 @@ import { DiscoveryNotification, DiscoveryToast } from './components/DiscoveryNot
 import { SimulationWorkerBridge } from './engine/workerBridge';
 import { SnapshotsModal } from './components/SnapshotsModal';
 import { ShortcutsModal } from './components/ShortcutsModal';
+import { TutorialOverlay } from './components/TutorialOverlay';
+import { CampaignModal } from './components/CampaignModal';
 import { CellProbe, CellProbeData } from './components/CellProbe';
 import { sounds } from './audio/sound';
 import { ChemicalDatabase, StoreItem } from './types/chemistry';
 import { UserProgress } from './types/game';
+import { CampaignLevel } from './types/campaign';
+import { LevelManager } from './engine/campaign';
 import { loadProgress, saveProgress, saveSnapshot } from './storage/db';
+import { Trophy, Star } from 'lucide-react';
 
 import moleculesJson from './data/molecules.json';
 import reactionsJson from './data/reactions.json';
 import storeItemsJson from './data/store_items.json';
+import levelsJson from './data/levels.json';
 
 const chemicalDatabase: ChemicalDatabase = {
   molecules: moleculesJson as unknown as ChemicalDatabase['molecules'],
   reactions: reactionsJson as unknown as ChemicalDatabase['reactions'],
   storeItems: storeItemsJson as unknown as ChemicalDatabase['storeItems'],
 };
+
+const campaignLevels = levelsJson as unknown as CampaignLevel[];
 
 const GRID_WIDTH = 180;
 const GRID_HEIGHT = 180;
@@ -49,6 +57,17 @@ export const App: React.FC = () => {
   const [isJournalOpen, setIsJournalOpen] = useState<boolean>(false);
   const [isSnapshotsOpen, setIsSnapshotsOpen] = useState<boolean>(false);
   const [isShortcutsOpen, setIsShortcutsOpen] = useState<boolean>(false);
+  const [isTutorialOpen, setIsTutorialOpen] = useState<boolean>(false);
+  const [isCampaignOpen, setIsCampaignOpen] = useState<boolean>(false);
+  const [activeLevel, setActiveLevel] = useState<CampaignLevel | null>(null);
+  const [victoryModal, setVictoryModal] = useState<{
+    levelId: string;
+    levelTitle: string;
+    stars: number;
+    timeSec: number;
+    nextLevelId?: string;
+  } | null>(null);
+
   const [speedMultiplier, setSpeedMultiplier] = useState<number>(1);
   const [toasts, setToasts] = useState<DiscoveryToast[]>([]);
 
@@ -57,6 +76,7 @@ export const App: React.FC = () => {
   const pixelsRef = useRef<Uint32Array | null>(null);
   const progressRef = useRef<UserProgress | null>(null);
   const pendingSnapshotNameRef = useRef<string>('');
+  const levelStartTimeRef = useRef<number | null>(null);
 
   useEffect(() => {
     progressRef.current = progress;
@@ -265,6 +285,9 @@ export const App: React.FC = () => {
     async function init() {
       const saved = await loadProgress();
       setProgress(saved);
+      if (!saved.hasCompletedTutorial) {
+        setIsTutorialOpen(true);
+      }
 
       bridge = new SimulationWorkerBridge({
         onFrame: (data) => {
@@ -272,6 +295,38 @@ export const App: React.FC = () => {
           setFps(data.fps);
           setActiveParticles(data.activeParticles);
           setAvgTemp(data.avgTemperature);
+        },
+        onLevelWon: (payload) => {
+          const current = progressRef.current;
+          if (!current) return;
+          const currentLevel = campaignLevels.find((l) => l.id === payload.levelId);
+          if (!currentLevel) return;
+
+          const now = Date.now();
+          const start = levelStartTimeRef.current || now - 10000;
+          const elapsed = Math.max(1, Math.round((now - start) / 1000));
+          const manager = new LevelManager(campaignLevels, current);
+          const { stars, nextLevelUnlocked, updatedProgress } = manager.completeLevel(
+            payload.levelId,
+            elapsed,
+          );
+
+          setProgress(updatedProgress);
+          saveProgress(updatedProgress);
+
+          sounds.playDiscovery();
+          setVictoryModal({
+            levelId: payload.levelId,
+            levelTitle: currentLevel.title,
+            stars,
+            timeSec: elapsed,
+            nextLevelId: nextLevelUnlocked,
+          });
+          addToast({
+            title: `Mission Complete! ${'★'.repeat(stars)}`,
+            message: `${currentLevel.title} completed in ${elapsed}s!`,
+            reward: stars * 25,
+          });
         },
         onCellInfo: (info) => {
           setProbeData((prev) =>
@@ -455,9 +510,43 @@ export const App: React.FC = () => {
     });
   };
 
-  const unlockedItems = chemicalDatabase.storeItems.filter(
-    (item) => progress?.unlockedStoreItems.includes(item.id) || item.unlocked_by_default,
-  );
+  const handleCompleteTutorial = () => {
+    setIsTutorialOpen(false);
+    const current = progressRef.current;
+    if (!current) return;
+    const updated: UserProgress = {
+      ...current,
+      hasCompletedTutorial: true,
+    };
+    setProgress(updated);
+    saveProgress(updated);
+  };
+
+  const handleSelectLevel = (level: CampaignLevel) => {
+    setActiveLevel(level);
+    levelStartTimeRef.current = Date.now();
+    bridgeRef.current?.clear();
+    bridgeRef.current?.setCampaignLevel(level);
+    addToast({
+      title: `Campaign Mission: ${level.title}`,
+      message: level.winCondition.description,
+      reward: 0,
+    });
+  };
+
+  const handleExitCampaign = () => {
+    setActiveLevel(null);
+    levelStartTimeRef.current = null;
+    setVictoryModal(null);
+    bridgeRef.current?.setCampaignLevel(null);
+  };
+
+  const unlockedItems = chemicalDatabase.storeItems.filter((item) => {
+    if (activeLevel && !activeLevel.availableStoreItems.includes(item.id)) {
+      return false;
+    }
+    return progress?.unlockedStoreItems.includes(item.id) || item.unlocked_by_default;
+  });
 
   // Global Keyboard Shortcuts
   useEffect(() => {
@@ -592,6 +681,8 @@ export const App: React.FC = () => {
         onOpenStore={() => setIsStoreOpen(true)}
         onOpenJournal={() => setIsJournalOpen(true)}
         onOpenSnapshots={() => setIsSnapshotsOpen(true)}
+        onOpenTutorial={() => setIsTutorialOpen(true)}
+        onOpenCampaign={() => setIsCampaignOpen(true)}
         renderMode={renderMode}
         onToggleRenderMode={handleToggleRenderMode}
         gravity={gravity}
@@ -607,6 +698,25 @@ export const App: React.FC = () => {
         discoveredCount={progress?.discoveredCompounds.length ?? 0}
         totalCompoundsCount={Object.keys(chemicalDatabase.molecules).length - 1}
       />
+
+      {/* Active Campaign Mission Banner */}
+      {activeLevel && (
+        <div
+          className="absolute top-16 left-1/2 -translate-x-1/2 z-20 px-4 py-2 rounded-2xl bg-slate-900/90 border border-sky-500/50 backdrop-blur-md shadow-xl flex items-center gap-3 text-xs text-white"
+          id="campaign-active-banner"
+        >
+          <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+          <span className="font-bold text-sky-400">Mission: {activeLevel.title}</span>
+          <span className="text-slate-300">Goal: {activeLevel.winCondition.description}</span>
+          <button
+            onClick={handleExitCampaign}
+            id="exit-campaign-button"
+            className="ml-2 px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors"
+          >
+            Exit Mission
+          </button>
+        </div>
+      )}
 
       {/* Main Simulation Tank Canvas */}
       <CanvasRenderer
@@ -660,6 +770,72 @@ export const App: React.FC = () => {
         onRequestSaveSnapshot={handleRequestSaveSnapshot}
         onLoadSnapshotState={handleLoadSnapshotState}
       />
+
+      {/* Campaign Mode Modal */}
+      <CampaignModal
+        isOpen={isCampaignOpen}
+        onClose={() => setIsCampaignOpen(false)}
+        levels={campaignLevels}
+        completedLevels={progress?.completedLevels ?? {}}
+        activeLevelId={activeLevel?.id ?? null}
+        onSelectLevel={handleSelectLevel}
+      />
+
+      {/* Interactive Guided Tutorial Overlay */}
+      <TutorialOverlay
+        isOpen={isTutorialOpen}
+        onComplete={handleCompleteTutorial}
+        onOpenStore={() => setIsStoreOpen(true)}
+      />
+
+      {/* Victory Modal */}
+      {victoryModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fadeIn"
+          id="victory-modal"
+        >
+          <div className="p-6 rounded-3xl bg-slate-900 border border-amber-500/50 shadow-2xl flex flex-col items-center gap-4 text-center max-w-sm w-full">
+            <div className="p-3 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30">
+              <Trophy className="w-8 h-8" />
+            </div>
+            <h2 className="text-xl font-black text-white">Mission Complete!</h2>
+            <p className="text-sm font-semibold text-sky-400">{victoryModal.levelTitle}</p>
+            <div className="flex items-center gap-1.5 my-1">
+              {[1, 2, 3].map((s) => (
+                <Star
+                  key={s}
+                  className={`w-6 h-6 ${
+                    s <= victoryModal.stars ? 'text-amber-400 fill-amber-400' : 'text-slate-700'
+                  }`}
+                />
+              ))}
+            </div>
+            <p className="text-xs text-slate-400 font-mono">Completed in {victoryModal.timeSec}s</p>
+            <div className="flex items-center gap-2 w-full pt-2">
+              {victoryModal.nextLevelId && (
+                <button
+                  onClick={() => {
+                    const next = campaignLevels.find((l) => l.id === victoryModal.nextLevelId);
+                    if (next) handleSelectLevel(next);
+                    setVictoryModal(null);
+                  }}
+                  id="next-level-button"
+                  className="flex-1 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 font-bold text-xs text-white shadow-lg shadow-sky-500/25 transition-all hover:scale-105"
+                >
+                  Next Mission
+                </button>
+              )}
+              <button
+                onClick={() => setVictoryModal(null)}
+                id="close-victory-button"
+                className="flex-1 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 font-bold text-xs text-slate-300 transition-colors"
+              >
+                Continue Sandbox
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Keyboard Shortcuts Cheatsheet Modal */}
       <ShortcutsModal isOpen={isShortcutsOpen} onClose={() => setIsShortcutsOpen(false)} />

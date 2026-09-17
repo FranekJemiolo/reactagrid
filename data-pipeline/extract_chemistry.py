@@ -501,6 +501,86 @@ MOLECULES_DATA: Dict[str, Dict[str, Any]] = {
         "hazard_rating": 3,
         "hazard_description": "HIGHLY TOXIC yellow-green choking gas. Severe respiratory hazard.",
         "description": "Dense halogen gas released when bleach is mixed with concentrated acids."
+    },
+    "bunsen_burner": {
+        "id": "bunsen_burner",
+        "name": "Bunsen Burner",
+        "formula": "Heat Source",
+        "state": "solid",
+        "density": 8.0,
+        "color": "#f97316ff",
+        "melting_point_k": 3000.0,
+        "boiling_point_k": 4000.0,
+        "specific_heat": 0.9,
+        "thermal_conductivity": 15.0,
+        "flammable": False,
+        "hazard_rating": 2,
+        "hazard_description": "Continuous combustion flame heat source (+50°C/tick).",
+        "description": "Laboratory heat source continuously providing +50°C heat per tick to cells directly above it."
+    },
+    "cooling_plate": {
+        "id": "cooling_plate",
+        "name": "Cooling Plate",
+        "formula": "Heat Sink",
+        "state": "solid",
+        "density": 8.0,
+        "color": "#06b6d4ff",
+        "melting_point_k": 3000.0,
+        "boiling_point_k": 4000.0,
+        "specific_heat": 0.9,
+        "thermal_conductivity": 15.0,
+        "flammable": False,
+        "hazard_rating": 1,
+        "hazard_description": "Thermoelectric cryo cooling element down to -20°C.",
+        "description": "Continuous cooling plate that chills touching cells down to -20°C (253.15 K)."
+    },
+    "stirrer": {
+        "id": "stirrer",
+        "name": "Magnetic Stirrer",
+        "formula": "Agitator",
+        "state": "solid",
+        "density": 8.0,
+        "color": "#a855f7ff",
+        "melting_point_k": 3000.0,
+        "boiling_point_k": 4000.0,
+        "specific_heat": 0.9,
+        "thermal_conductivity": 0.5,
+        "flammable": False,
+        "hazard_rating": 0,
+        "hazard_description": "Mechanical fluid agitator for mixing.",
+        "description": "Solid laboratory agitator that imparts horizontal velocity vectors to adjacent liquids to force mixing."
+    },
+    "h2o_gas": {
+        "id": "h2o_gas",
+        "name": "Water Vapor (Steam)",
+        "formula": "H₂O (g)",
+        "state": "gas",
+        "density": 0.0006,
+        "color": "#cad9e688",
+        "melting_point_k": 273.15,
+        "boiling_point_k": 373.15,
+        "specific_heat": 2.08,
+        "thermal_conductivity": 0.025,
+        "flammable": False,
+        "hazard_rating": 1,
+        "hazard_description": "Scalding risk under high temperatures.",
+        "description": "Gaseous water vapor phase expanding rapidly upwards."
+    },
+    "h2_gas": {
+        "id": "h2_gas",
+        "name": "Hydrogen Gas",
+        "formula": "H₂ (g)",
+        "state": "gas",
+        "density": 0.000089,
+        "color": "#e0f2fe66",
+        "melting_point_k": 14.01,
+        "boiling_point_k": 20.28,
+        "specific_heat": 14.304,
+        "thermal_conductivity": 0.1805,
+        "flammable": True,
+        "hazard_rating": 4,
+        "hazard_description": "EXTREMELY FLAMMABLE and explosive gas.",
+        "description": "Lightest gas in the universe, extremely buoyant and explosive in presence of oxygen and ignition."
     }
 }
 
@@ -977,6 +1057,45 @@ STORE_ITEMS_DATA: List[Dict[str, Any]] = [
         ],
         "primary_compound": "c2h5oh",
         "icon": "Wine"
+    },
+    {
+        "id": "item_bunsen_burner",
+        "name": "Bunsen Burner",
+        "category": "Equipment",
+        "cost": 15,
+        "description": "Solid-state laboratory burner continuously adding +50°C heat per tick to cells directly above it.",
+        "unlocked_by_default": True,
+        "composition": [
+            {"compound": "bunsen_burner", "percentage": 100}
+        ],
+        "primary_compound": "bunsen_burner",
+        "icon": "Flame"
+    },
+    {
+        "id": "item_cooling_plate",
+        "name": "Cooling Plate",
+        "category": "Equipment",
+        "cost": 15,
+        "description": "Thermoelectric cryo cooling plate continuously chilling touching cells down to -20°C (253.15 K).",
+        "unlocked_by_default": True,
+        "composition": [
+            {"compound": "cooling_plate", "percentage": 100}
+        ],
+        "primary_compound": "cooling_plate",
+        "icon": "Snowflake"
+    },
+    {
+        "id": "item_stirrer",
+        "name": "Magnetic Stirrer",
+        "category": "Equipment",
+        "cost": 15,
+        "description": "Mechanical lab agitator applying horizontal velocity vectors to adjacent liquids to force mixing.",
+        "unlocked_by_default": True,
+        "composition": [
+            {"compound": "stirrer", "percentage": 100}
+        ],
+        "primary_compound": "stirrer",
+        "icon": "Activity"
     }
 ]
 

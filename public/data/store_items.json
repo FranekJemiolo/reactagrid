@@ -226,5 +226,53 @@
     ],
     "primary_compound": "c2h5oh",
     "icon": "Wine"
+  },
+  {
+    "id": "item_bunsen_burner",
+    "name": "Bunsen Burner",
+    "category": "Equipment",
+    "cost": 15,
+    "description": "Solid-state laboratory burner continuously adding +50°C heat per tick to cells directly above it.",
+    "unlocked_by_default": true,
+    "composition": [
+      {
+        "compound": "bunsen_burner",
+        "percentage": 100
+      }
+    ],
+    "primary_compound": "bunsen_burner",
+    "icon": "Flame"
+  },
+  {
+    "id": "item_cooling_plate",
+    "name": "Cooling Plate",
+    "category": "Equipment",
+    "cost": 15,
+    "description": "Thermoelectric cryo cooling plate continuously chilling touching cells down to -20°C (253.15 K).",
+    "unlocked_by_default": true,
+    "composition": [
+      {
+        "compound": "cooling_plate",
+        "percentage": 100
+      }
+    ],
+    "primary_compound": "cooling_plate",
+    "icon": "Snowflake"
+  },
+  {
+    "id": "item_stirrer",
+    "name": "Magnetic Stirrer",
+    "category": "Equipment",
+    "cost": 15,
+    "description": "Mechanical lab agitator applying horizontal velocity vectors to adjacent liquids to force mixing.",
+    "unlocked_by_default": true,
+    "composition": [
+      {
+        "compound": "stirrer",
+        "percentage": 100
+      }
+    ],
+    "primary_compound": "stirrer",
+    "icon": "Activity"
   }
 ]

@@ -1,4 +1,5 @@
 import { ChemicalDatabase } from './chemistry';
+import { CampaignLevel } from './campaign';
 
 export interface PaintCommand {
   x: number;
@@ -21,10 +22,12 @@ export type MainToWorkerMessage =
   | { type: 'SET_SPEED'; payload: { multiplier: number } }
   | { type: 'QUERY_CELL'; payload: { x: number; y: number } }
   | { type: 'LOAD_STATE'; payload: { types: Uint16Array; temps: Float32Array } }
-  | { type: 'REQUEST_STATE' };
+  | { type: 'REQUEST_STATE' }
+  | { type: 'SET_CAMPAIGN_LEVEL'; payload: { level: CampaignLevel | null } };
 
 export type WorkerToMainMessage =
   | { type: 'INITIALIZED'; payload: { width: number; height: number } }
+  | { type: 'LEVEL_WON'; payload: { levelId: string } }
   | {
       type: 'FRAME';
       payload: {
