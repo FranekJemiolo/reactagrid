@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
+import { VFXRenderer } from '../rendering/vfxRenderer';
 
 interface CanvasRendererProps {
   width: number;
@@ -7,6 +8,7 @@ interface CanvasRendererProps {
   onHover?: (gridX: number, gridY: number, screenX: number, screenY: number) => void;
   pixelsRef: React.MutableRefObject<Uint32Array | null>;
   brushRadius: number;
+  vfxRef?: React.MutableRefObject<VFXRenderer | null>;
 }
 
 export const CanvasRenderer: React.FC<CanvasRendererProps> = ({
@@ -16,31 +18,77 @@ export const CanvasRenderer: React.FC<CanvasRendererProps> = ({
   onHover,
   pixelsRef,
   brushRadius,
+  vfxRef,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const overlayCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [cursorPos, setCursorPos] = useState<{ x: number; y: number } | null>(null);
   const animFrameRef = useRef<number | null>(null);
+  const internalVfxRef = useRef<VFXRenderer | null>(null);
 
-  // Render loop directly blitting pixels to canvas
+  // Initialize VFX Renderer
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d', { alpha: true });
-    if (!ctx) return;
 
-    let imgData = ctx.createImageData(width, height);
-    let buf32 = new Uint32Array(imgData.data.buffer);
+    const vfx = new VFXRenderer(canvas, width, height);
+    internalVfxRef.current = vfx;
+    if (vfxRef) {
+      vfxRef.current = vfx;
+    }
 
-    const render = () => {
-      if (pixelsRef.current) {
-        if (imgData.width !== width || imgData.height !== height) {
-          imgData = ctx.createImageData(width, height);
-          buf32 = new Uint32Array(imgData.data.buffer);
-        }
-        buf32.set(pixelsRef.current);
-        ctx.putImageData(imgData, 0, 0);
+    return () => {
+      internalVfxRef.current = null;
+      if (vfxRef) {
+        vfxRef.current = null;
       }
+    };
+  }, [width, height, vfxRef]);
+
+  // Combined Render loop: WebGL Bloom Shader + 2D Particle System + Fallback
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const overlayCanvas = overlayCanvasRef.current;
+    if (!canvas) return;
+
+    // Check if WebGL bloom is active on main canvas
+    const vfx = internalVfxRef.current;
+    const hasWebGL = vfx?.bloomRenderer?.getIsSupported();
+
+    // 2D fallback context if WebGL is unavailable
+    let ctx2d: CanvasRenderingContext2D | null = null;
+    let imgData: ImageData | null = null;
+    let buf32: Uint32Array | null = null;
+
+    if (!hasWebGL) {
+      ctx2d = canvas.getContext('2d', { alpha: true });
+      if (ctx2d) {
+        imgData = ctx2d.createImageData(width, height);
+        buf32 = new Uint32Array(imgData.data.buffer);
+      }
+    }
+
+    const overlayCtx = overlayCanvas ? overlayCanvas.getContext('2d') : null;
+
+    const render = (time: number) => {
+      const pixels = pixelsRef.current;
+      if (pixels) {
+        if (hasWebGL && vfx) {
+          // Render with WebGL Bloom Shader
+          vfx.render(pixels, overlayCtx, time);
+        } else if (ctx2d && imgData && buf32) {
+          // 2D Canvas Blit Fallback
+          buf32.set(pixels);
+          ctx2d.putImageData(imgData, 0, 0);
+
+          // Update & Render 2D particles
+          if (vfx && overlayCtx) {
+            vfx.render(pixels, overlayCtx, time);
+          }
+        }
+      }
+
       animFrameRef.current = requestAnimationFrame(render);
     };
 
@@ -126,6 +174,7 @@ export const CanvasRenderer: React.FC<CanvasRendererProps> = ({
 
   return (
     <div className="relative w-full h-full flex items-center justify-center overflow-hidden select-none touch-none bg-slate-950">
+      {/* Main Simulation Tank Canvas (WebGL Bloom / 2D fallback) */}
       <canvas
         ref={canvasRef}
         id="simulation-canvas"
@@ -142,6 +191,16 @@ export const CanvasRenderer: React.FC<CanvasRendererProps> = ({
         onTouchEnd={handlePointerUp}
       />
 
+      {/* Overlaid Particle System Canvas (Sparks, Smoke, Shockwaves) */}
+      <canvas
+        ref={overlayCanvasRef}
+        id="vfx-particle-overlay"
+        width={width}
+        height={height}
+        className="pointer-events-none absolute w-full h-full max-w-full max-h-full object-contain rounded-lg"
+      />
+
+      {/* Brush Indicator */}
       {cursorPos && (
         <div
           className="pointer-events-none absolute border border-sky-400/60 rounded-full bg-sky-400/10 transition-transform duration-75"

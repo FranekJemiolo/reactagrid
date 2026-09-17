@@ -1,37 +1,97 @@
-import { CampaignLevel } from '../types/campaign';
+import { CampaignLevel, CompoundCountCondition } from '../types/campaign';
 import { UserProgress } from '../types/game';
 import { SimulationEngine } from './simulation';
+
+function getCompoundPixelCount(compound: string, engine: SimulationEngine): number {
+  const targetId = engine.getSpeciesId(compound);
+  const altTargetId =
+    compound === 'h2o_steam'
+      ? engine.getSpeciesId('h2o_gas')
+      : compound === 'h2o_gas'
+        ? engine.getSpeciesId('h2o_steam')
+        : compound === 'h2'
+          ? engine.getSpeciesId('h2_gas')
+          : compound === 'h2_gas'
+            ? engine.getSpeciesId('h2')
+            : 0;
+
+  let count = 0;
+  const types = engine.typeGrid;
+  const len = types.length;
+  for (let i = 0; i < len; i++) {
+    const t = types[i];
+    if (t !== 0 && (t === targetId || (altTargetId !== 0 && t === altTargetId))) {
+      count++;
+    }
+  }
+  return count;
+}
+
+function evaluateBoundsCondition(cond: CompoundCountCondition, engine: SimulationEngine): boolean {
+  const count = getCompoundPixelCount(cond.compound, engine);
+  if (cond.minCount !== undefined && count < cond.minCount) {
+    return false;
+  }
+  if (cond.maxCount !== undefined && count > cond.maxCount) {
+    return false;
+  }
+  return true;
+}
 
 export function checkWinCondition(level: CampaignLevel, engine: SimulationEngine): boolean {
   const { winCondition } = level;
 
+  // 1. Compound Count
   if (winCondition.type === 'compound_count') {
     const target = winCondition.targetCompound || '';
-    const targetId = engine.getSpeciesId(target);
-    const altTargetId =
-      target === 'h2o_steam'
-        ? engine.getSpeciesId('h2o_gas')
-        : target === 'h2o_gas'
-          ? engine.getSpeciesId('h2o_steam')
-          : target === 'h2'
-            ? engine.getSpeciesId('h2_gas')
-            : target === 'h2_gas'
-              ? engine.getSpeciesId('h2')
-              : 0;
-
-    let count = 0;
-    const types = engine.typeGrid;
-    const len = types.length;
-    for (let i = 0; i < len; i++) {
-      const t = types[i];
-      if (t !== 0 && (t === targetId || (altTargetId !== 0 && t === altTargetId))) {
-        count++;
-      }
+    const count = getCompoundPixelCount(target, engine);
+    if (winCondition.minCount !== undefined && count < winCondition.minCount) {
+      return false;
     }
-
-    return count >= (winCondition.minCount ?? 1);
+    if (winCondition.maxCount !== undefined && count > winCondition.maxCount) {
+      return false;
+    }
+    return true;
   }
 
+  // 2. Compound Bounds (Multi-condition check, e.g. 0 ice AND >= 100 liquid water)
+  if (winCondition.type === 'compound_bounds') {
+    if (!winCondition.conditions || winCondition.conditions.length === 0) {
+      return false;
+    }
+    return winCondition.conditions.every((cond) => evaluateBoundsCondition(cond, engine));
+  }
+
+  // 3. Gas Containment without shattering glass
+  if (winCondition.type === 'gas_containment') {
+    const gasCount = engine.getGasCellCount();
+    const minGas = winCondition.minGasCount ?? 500;
+    if (gasCount < minGas) return false;
+    if (winCondition.glassShatterForbidden && engine.shatteredGlassCount > 0) {
+      return false;
+    }
+    return true;
+  }
+
+  // 4. Stirrer Rotational Velocity sustained duration
+  if (winCondition.type === 'rotational_velocity') {
+    const requiredSustain = winCondition.sustainSeconds ?? 10.0;
+    return engine.stirrerSustainedSeconds >= requiredSustain;
+  }
+
+  // 5. Controlled Demolition (Blast Attenuation)
+  if (winCondition.type === 'controlled_demolition') {
+    const target = winCondition.targetCompound || 'na';
+    const targetCount = getCompoundPixelCount(target, engine);
+    const maxAllowed = winCondition.maxCount ?? 0;
+    if (targetCount > maxAllowed) return false;
+    if (winCondition.glassShatterForbidden && engine.shatteredGlassCount > 0) {
+      return false;
+    }
+    return true;
+  }
+
+  // 6. Zone Temperature
   if (winCondition.type === 'zone_temperature') {
     const { zone, minTempK = 500 } = winCondition;
     if (!zone) return false;
@@ -49,7 +109,6 @@ export function checkWinCondition(level: CampaignLevel, engine: SimulationEngine
     for (let y = yMin; y <= yMax; y++) {
       for (let x = xMin; x <= xMax; x++) {
         const idx = y * w + x;
-        // Check if any cell in target zone reached the required temperature
         if (types[idx] !== 0 && temps[idx] >= minTempK) {
           return true;
         }
@@ -99,6 +158,15 @@ export class LevelManager {
     return prevStars > 0;
   }
 
+  public startLevel(levelId: string, engine: SimulationEngine): void {
+    const level = this.getLevel(levelId);
+    if (!level) return;
+    engine.clear();
+    if (level.initialGrid && level.initialGrid.length > 0) {
+      engine.loadInitialGrid(level.initialGrid);
+    }
+  }
+
   public completeLevel(
     levelId: string,
     elapsedSeconds: number,
@@ -123,7 +191,6 @@ export class LevelManager {
     };
     this.progress = updatedProgress;
 
-    // Determine if next level became unlocked
     const currentIndex = this.levels.findIndex((lvl) => lvl.id === levelId);
     let nextLevelUnlocked: string | undefined;
     if (currentIndex >= 0 && currentIndex + 1 < this.levels.length) {

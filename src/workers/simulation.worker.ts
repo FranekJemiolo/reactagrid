@@ -212,6 +212,9 @@ self.addEventListener('message', (e: MessageEvent<MainToWorkerMessage>) => {
     case 'SET_CAMPAIGN_LEVEL': {
       activeCampaignLevel = msg.payload.level;
       hasWonCampaignLevel = false;
+      if (engine && activeCampaignLevel?.initialGrid) {
+        engine.loadInitialGrid(activeCampaignLevel.initialGrid);
+      }
       break;
     }
 

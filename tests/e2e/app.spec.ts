@@ -247,11 +247,11 @@ test.describe('ReactaGrid - Complete E2E Gameplay & Simulation Flow', () => {
     await expect(campaignModal).toContainText('Laboratory Campaign Missions');
 
     // Level 1 should be playable
-    const playLevel1 = page.locator('#play-level-level_1_steam');
+    const playLevel1 = page.locator('#play-level-level_1_phase_shift');
     await expect(playLevel1).toBeVisible();
 
     // Level 2 should initially be locked
-    const level2 = page.locator('#campaign-level-level_2_volcano');
+    const level2 = page.locator('#campaign-level-level_2_neutralizer');
     await expect(level2).toContainText('Locked');
 
     // Launch Level 1
@@ -272,7 +272,7 @@ test.describe('ReactaGrid - Complete E2E Gameplay & Simulation Flow', () => {
   }) => {
     // Open Campaign Modal and launch a level
     await page.click('#open-campaign-button');
-    await page.click('#play-level-level_1_steam');
+    await page.click('#play-level-level_1_phase_shift');
 
     // Verify simulation canvas is mounted
     const canvas = page.locator('#simulation-canvas');
@@ -310,6 +310,33 @@ test.describe('ReactaGrid - Complete E2E Gameplay & Simulation Flow', () => {
         const fpsVal = parseInt(fpsMatch[1], 10);
         expect(fpsVal).toBeGreaterThanOrEqual(45);
       }
+    }
+  });
+
+  test('Milestone 19: triggers Sodium + Water explosion with WebGL bloom & particle overlay, asserting framerate >= 45 FPS', async ({
+    page,
+  }) => {
+    // Open Experiments modal and load Sodium Hydrolysis blast
+    await page.click('#open-snapshots-button');
+    const experimentModal = page.locator('#snapshots-modal');
+    await expect(experimentModal).toBeVisible();
+
+    await page.click('#load-preset-sodium_blast');
+    await expect(experimentModal).not.toBeVisible();
+
+    // Verify particle overlay canvas is mounted
+    const overlay = page.locator('#vfx-particle-overlay');
+    await expect(overlay).toBeVisible();
+
+    // Let violent sodium hydrolysis reaction execute with sparks, smoke, and bloom
+    await page.waitForTimeout(1500);
+
+    // Verify framerate drops no frames (sustains >= 45 FPS)
+    const fpsText = await page.locator('#fps-counter').innerText();
+    const fpsMatch = fpsText.match(/(\d+)\s*FPS/i);
+    if (fpsMatch) {
+      const fpsVal = parseInt(fpsMatch[1], 10);
+      expect(fpsVal).toBeGreaterThanOrEqual(45);
     }
   });
 });

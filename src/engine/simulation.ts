@@ -7,6 +7,9 @@ export interface ReactionEvent {
   heatYield: number;
   reward: number;
   discoveredProducts: string[];
+  x?: number;
+  y?: number;
+  pressureRelease?: number;
 }
 
 export class SimulationEngine {
@@ -45,6 +48,10 @@ export class SimulationEngine {
 
   public queuedEvents: ReactionEvent[] = [];
   public newlyDiscoveredCompounds: Set<string> = new Set();
+
+  public shatteredGlassCount = 0;
+  public stirrerRotationalVelocity = 0;
+  public stirrerSustainedSeconds = 0;
 
   constructor(width: number, height: number, database: ChemicalDatabase) {
     this.width = width;
@@ -174,6 +181,9 @@ export class SimulationEngine {
     this.tempGrid.fill(298.15);
     this.flagGrid.fill(0);
     this.colorBuffer.fill(0);
+    this.shatteredGlassCount = 0;
+    this.stirrerRotationalVelocity = 0;
+    this.stirrerSustainedSeconds = 0;
   }
 
   public setCell(x: number, y: number, compoundId: string, tempK = 298.15): void {
@@ -213,6 +223,51 @@ export class SimulationEngine {
         }
       }
     }
+  }
+
+  public loadInitialGrid(
+    elements: {
+      x: number;
+      y: number;
+      width?: number;
+      height?: number;
+      compound: string;
+      tempK?: number;
+    }[],
+  ): void {
+    for (const elem of elements) {
+      const compoundId = this.getSpeciesId(elem.compound);
+      if (!compoundId) continue;
+      const w = elem.width ?? 1;
+      const h = elem.height ?? 1;
+      const temp = elem.tempK ?? 298.15;
+      for (let dy = 0; dy < h; dy++) {
+        for (let dx = 0; dx < w; dx++) {
+          const px = elem.x + dx;
+          const py = elem.y + dy;
+          if (px >= 0 && px < this.width && py >= 0 && py < this.height) {
+            const idx = py * this.width + px;
+            this.typeGrid[idx] = compoundId;
+            this.tempGrid[idx] = temp;
+          }
+        }
+      }
+    }
+    this.renderColorBuffer();
+  }
+
+  public getGasCellCount(): number {
+    let count = 0;
+    const types = this.typeGrid;
+    const states = this.stateLookup;
+    const len = types.length;
+    for (let i = 0; i < len; i++) {
+      const t = types[i];
+      if (t !== 0 && states[t] === 0) {
+        count++;
+      }
+    }
+    return count;
   }
 
   public getCellInfo(
@@ -314,6 +369,7 @@ export class SimulationEngine {
           }
         }
         // 3. Stirrer: Applies horizontal velocity vectors to adjacent liquid pixels to force mixing
+        // Also captures kinetic energy from expanding gases to drive rotational velocity
         else if (type === stirrerId) {
           const adjacent = [
             { nx: x, ny: y - 1, pushX: 1, pushY: 0 },
@@ -325,7 +381,13 @@ export class SimulationEngine {
             if (adj.nx >= 0 && adj.nx < w && adj.ny >= 0 && adj.ny < h) {
               const adjIdx = adj.ny * w + adj.nx;
               const adjType = types[adjIdx];
-              if (states[adjType] === 1) {
+              // Expanding gases passing stirrer drive angular velocity
+              if (states[adjType] === 0) {
+                this.stirrerRotationalVelocity = Math.min(
+                  15.0,
+                  this.stirrerRotationalVelocity + 0.2,
+                );
+              } else if (states[adjType] === 1) {
                 const destX = adj.nx + adj.pushX;
                 const destY = adj.ny + adj.pushY;
                 if (destX >= 0 && destX < w && destY >= 0 && destY < h) {
@@ -362,9 +424,18 @@ export class SimulationEngine {
           if (hotGasesNearby >= 2 && maxTemp >= 600) {
             types[idx] = sio2Id || 0;
             temps[idx] = maxTemp;
+            this.shatteredGlassCount++;
           }
         }
       }
+    }
+
+    // Rotational damping & duration sustain evaluation
+    this.stirrerRotationalVelocity *= 0.992;
+    if (this.stirrerRotationalVelocity >= 5.0) {
+      this.stirrerSustainedSeconds += 1.0 / 60.0;
+    } else {
+      this.stirrerSustainedSeconds = Math.max(0, this.stirrerSustainedSeconds - 0.05);
     }
   }
 
@@ -748,7 +819,7 @@ export class SimulationEngine {
       temps[cellIdx] += rxn.temperature_delta_k;
     }
 
-    // If more products than cell indices (e.g. CO2 gas in effervescence), find adjacent empty cell or push upward
+    // If more products than cell indices (e.g. CO2 gas in effervescence), find adjacent empty cell
     if (products.length > cellIndices.length) {
       for (let pIdx = cellIndices.length; pIdx < products.length; pIdx++) {
         const extraProd = products[pIdx];
@@ -757,12 +828,24 @@ export class SimulationEngine {
         const rx = refIdx % this.width;
         const ry = Math.floor(refIdx / this.width);
 
-        // Find neighbor or cell above
-        const aboveY = ry - 1;
-        if (aboveY >= 0) {
-          const targetIdx = aboveY * this.width + rx;
-          types[targetIdx] = extraSpecies;
-          temps[targetIdx] = temps[refIdx];
+        let placed = false;
+        for (let dy = 1; dy <= 6; dy++) {
+          const aboveY = ry - dy;
+          if (aboveY >= 0) {
+            for (const dx of [0, 1, -1, 2, -2]) {
+              const targetX = rx + dx;
+              if (targetX >= 0 && targetX < this.width) {
+                const targetIdx = aboveY * this.width + targetX;
+                if (types[targetIdx] === 0) {
+                  types[targetIdx] = extraSpecies;
+                  temps[targetIdx] = temps[refIdx];
+                  placed = true;
+                  break;
+                }
+              }
+            }
+            if (placed) break;
+          }
         }
       }
     }
@@ -788,6 +871,7 @@ export class SimulationEngine {
     }
 
     // Queue reaction event for main thread
+    const primaryIdx = cellIndices[0] ?? 0;
     this.queuedEvents.push({
       reactionId: rxn.id,
       name: rxn.name,
@@ -795,6 +879,9 @@ export class SimulationEngine {
       heatYield: rxn.heat_yield_kj_mol,
       reward: rxn.discovery_reward,
       discoveredProducts: [...products],
+      x: primaryIdx % this.width,
+      y: Math.floor(primaryIdx / this.width),
+      pressureRelease: rxn.pressure_release,
     });
   }
 

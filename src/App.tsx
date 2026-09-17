@@ -12,6 +12,7 @@ import { TutorialOverlay } from './components/TutorialOverlay';
 import { CampaignModal } from './components/CampaignModal';
 import { CellProbe, CellProbeData } from './components/CellProbe';
 import { sounds } from './audio/sound';
+import { VFXRenderer } from './rendering/vfxRenderer';
 import { ChemicalDatabase, StoreItem } from './types/chemistry';
 import { UserProgress } from './types/game';
 import { CampaignLevel } from './types/campaign';
@@ -77,6 +78,7 @@ export const App: React.FC = () => {
   const progressRef = useRef<UserProgress | null>(null);
   const pendingSnapshotNameRef = useRef<string>('');
   const levelStartTimeRef = useRef<number | null>(null);
+  const vfxRef = useRef<VFXRenderer | null>(null);
 
   useEffect(() => {
     progressRef.current = progress;
@@ -337,9 +339,22 @@ export const App: React.FC = () => {
           const current = progressRef.current;
           if (!current) return;
 
-          // Procedural sound trigger
-          if (Math.abs(rxn.heatYield) > 200 || rxn.reactionId.includes('explosion')) {
-            sounds.playExplosion();
+          // Milestone 19: Emit visual particle effects (sparks, smoke, shockwaves)
+          vfxRef.current?.onReaction(
+            rxn.x ?? Math.floor(GRID_WIDTH / 2),
+            rxn.y ?? Math.floor(GRID_HEIGHT / 2),
+            rxn.heatYield,
+            rxn.reactionId,
+          );
+
+          // Milestone 20: Procedural audio synthesis routed through Event Throttler
+          if (
+            Math.abs(rxn.heatYield) > 200 ||
+            rxn.reactionId.includes('explosion') ||
+            rxn.reactionId.includes('hydrolysis')
+          ) {
+            sounds.playExplosion(rxn.heatYield);
+            sounds.playSizzling();
           } else {
             sounds.playBubbling();
           }
@@ -726,6 +741,7 @@ export const App: React.FC = () => {
         onHover={handleCanvasHover}
         pixelsRef={pixelsRef}
         brushRadius={brushRadius}
+        vfxRef={vfxRef}
       />
 
       {/* Real-time Pixel Probe Tooltip */}

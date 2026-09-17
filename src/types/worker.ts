@@ -61,6 +61,9 @@ export type WorkerToMainMessage =
         heatYield: number;
         reward: number;
         discoveredProducts: string[];
+        x?: number;
+        y?: number;
+        pressureRelease?: number;
       };
     }
   | {
